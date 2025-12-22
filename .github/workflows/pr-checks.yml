@@ -1,6 +1,8 @@
 name: PR Checks
 
 on:
+  pull_request:
+    types: [opened, reopened, synchronize, ready_for_review]
   workflow_call:
     inputs:
       run-prettier:
@@ -35,15 +37,15 @@ jobs:
 
   prettier:
     needs: check-draft
-    if: needs.check-draft.outputs.should-run == 'true' && inputs.run-prettier != false
+    if: needs.check-draft.outputs.should-run == 'true' && (inputs.run-prettier != false || github.event_name != 'workflow_call')
     uses: holdex/github-actions/.github/workflows/prettier.yml@main
 
   markdown:
     needs: check-draft
-    if: needs.check-draft.outputs.should-run == 'true' && inputs.run-markdown != false
+    if: needs.check-draft.outputs.should-run == 'true' && (inputs.run-markdown != false || github.event_name != 'workflow_call')
     uses: holdex/github-actions/.github/workflows/markdown-check.yml@main
 
   commits:
     needs: check-draft
-    if: needs.check-draft.outputs.should-run == 'true' && inputs.run-commits != false
+    if: needs.check-draft.outputs.should-run == 'true' && (inputs.run-commits != false || github.event_name != 'workflow_call')
     uses: holdex/github-actions/.github/workflows/commit-check.yml@main
