@@ -47,7 +47,7 @@ jobs:
       false || github.event_name != 'workflow_call')
     uses: ./.github/workflows/prettier.yml
     with:
-      package_json_file: ${{ inputs.package_json_file }}
+      package_json_file: ${{ inputs.package_json_file || 'package.json' }}
 
   markdown:
     needs: check-draft
@@ -63,4 +63,4 @@ jobs:
       false || github.event_name != 'workflow_call')
     uses: ./.github/workflows/commit-check.yml
     with:
-      package_json_file: ${{ inputs.package_json_file }}
+      package_json_file: ${{ inputs.package_json_file || 'package.json' }}
