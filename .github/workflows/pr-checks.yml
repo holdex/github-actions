@@ -20,6 +20,11 @@ on:
         required: false
         type: boolean
         default: true
+      package_json_path:
+        description: "Path to package.json file"
+        required: false
+        type: string
+        default: "package.json"
 
 jobs:
   check-draft:
@@ -41,6 +46,8 @@ jobs:
       needs.check-draft.outputs.should-run == 'true' && (inputs.run-prettier !=
       false || github.event_name != 'workflow_call')
     uses: ./.github/workflows/prettier.yml
+    with:
+      package_json_path: ${{ inputs.package_json_path }}
 
   markdown:
     needs: check-draft
@@ -55,3 +62,5 @@ jobs:
       needs.check-draft.outputs.should-run == 'true' && (inputs.run-commits !=
       false || github.event_name != 'workflow_call')
     uses: ./.github/workflows/commit-check.yml
+    with:
+      package_json_path: ${{ inputs.package_json_path }}
