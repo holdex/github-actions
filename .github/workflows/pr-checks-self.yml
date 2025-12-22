@@ -6,4 +6,4 @@ on:
 
 jobs:
   checks:
-    uses: ./.github/workflows/pr-checks.yml@main
+    uses: ./.github/workflows/pr-checks.yml
