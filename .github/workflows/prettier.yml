@@ -21,7 +21,7 @@ jobs:
             fi
           done
 
-          if [ "$HAS_CONFIG" = false ] && ! grep -q '"prettier"' "${{ inputs.package_json_file }}" 2>/dev/null; then
+          if [ "$HAS_CONFIG" = false ] && ! grep -q '"prettier"' "package.json" 2>/dev/null; then
             echo "::error file=.prettierrc::No Prettier configuration file found."
             echo "Please create a .prettierrc file or add prettier config to package.json"
             exit 1
