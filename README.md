@@ -114,8 +114,6 @@ jobs:
   config in `package.json`
 - If no config exists, the workflow will create a default `.commitlintrc.json`
   file
-- `package.json` is required because the workflow installs
-  `@commitlint/config-conventional` as a dev dependency
 
 ## Workflow Details
 
