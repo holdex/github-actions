@@ -17,6 +17,12 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Set package.json path
+        id: pkg-json
+        run:
+          echo "path=${{ inputs.package_json_file || 'package.json' }}" >>
+          $GITHUB_OUTPUT
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -25,7 +31,8 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
-          package_json_file: ${{ inputs.package_json_path || 'package.json' }}
+          package_json_file: ${{ steps.pkg-json.outputs.path }}
+          version: 10
 
       - name: Install commitlint
         run: |
@@ -34,7 +41,7 @@ jobs:
 
       - name: Create commitlint config if missing
         run: |
-          if [ ! -f .commitlintrc.json ] && [ ! -f .commitlintrc.js ] && [ ! -f .commitlintrc.yml ] && [ ! -f .commitlintrc.yaml ] && ! grep -q '"commitlint"' "${{ inputs.package_json_path || 'package.json' }}" 2>/dev/null; then
+          if [ ! -f .commitlintrc.json ] && [ ! -f .commitlintrc.js ] && [ ! -f .commitlintrc.yml ] && [ ! -f .commitlintrc.yaml ] && ! grep -q '"commitlint"' "${{ steps.pkg-json.outputs.path }}" 2>/dev/null; then
             echo '{"extends": ["@commitlint/config-conventional"]}' > .commitlintrc.json
           fi
 

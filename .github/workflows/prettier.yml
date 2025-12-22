@@ -15,6 +15,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Set package.json path
+        id: pkg-json
+        run:
+          echo "path=${{ inputs.package_json_file || 'package.json' }}" >>
+          $GITHUB_OUTPUT
+
       - name: Check for Prettier config
         run: |
           CONFIG_FILES=".prettierrc .prettierrc.json .prettierrc.js .prettierrc.yaml .prettierrc.yml .prettierrc.toml prettier.config.js prettier.config.mjs"
@@ -27,7 +33,7 @@ jobs:
             fi
           done
 
-          if [ "$HAS_CONFIG" = false ] && ! grep -q '"prettier"' "${{ inputs.package_json_path || 'package.json' }}" 2>/dev/null; then
+          if [ "$HAS_CONFIG" = false ] && ! grep -q '"prettier"' "${{ steps.pkg-json.outputs.path }}" 2>/dev/null; then
             echo "::error file=.prettierrc::No Prettier configuration file found."
             echo "Please create a .prettierrc file or add prettier config to package.json"
             exit 1
@@ -41,7 +47,8 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
-          package_json_file: ${{ inputs.package_json_path || 'package.json' }}
+          package_json_file: ${{ steps.pkg-json.outputs.path }}
+          version: 10
 
       - name: Install Prettier
         run: pnpm add -g prettier
