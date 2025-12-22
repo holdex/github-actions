@@ -6,17 +6,17 @@ on:
   workflow_call:
     inputs:
       run-prettier:
-        description: 'Run Prettier check'
+        description: "Run Prettier check"
         required: false
         type: boolean
         default: true
       run-markdown:
-        description: 'Run Markdown check'
+        description: "Run Markdown check"
         required: false
         type: boolean
         default: true
       run-commits:
-        description: 'Run Commit check'
+        description: "Run Commit check"
         required: false
         type: boolean
         default: true
@@ -37,15 +37,21 @@ jobs:
 
   prettier:
     needs: check-draft
-    if: needs.check-draft.outputs.should-run == 'true' && (inputs.run-prettier != false || github.event_name != 'workflow_call')
+    if:
+      needs.check-draft.outputs.should-run == 'true' && (inputs.run-prettier !=
+      false || github.event_name != 'workflow_call')
     uses: ./.github/workflows/prettier.yml
 
   markdown:
     needs: check-draft
-    if: needs.check-draft.outputs.should-run == 'true' && (inputs.run-markdown != false || github.event_name != 'workflow_call')
+    if:
+      needs.check-draft.outputs.should-run == 'true' && (inputs.run-markdown !=
+      false || github.event_name != 'workflow_call')
     uses: ./.github/workflows/markdown-check.yml
 
   commits:
     needs: check-draft
-    if: needs.check-draft.outputs.should-run == 'true' && (inputs.run-commits != false || github.event_name != 'workflow_call')
+    if:
+      needs.check-draft.outputs.should-run == 'true' && (inputs.run-commits !=
+      false || github.event_name != 'workflow_call')
     uses: ./.github/workflows/commit-check.yml

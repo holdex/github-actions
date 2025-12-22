@@ -1,6 +1,7 @@
 # GitHub Actions
 
-Shared GitHub Actions workflows for consistent code quality checks across repositories.
+Shared GitHub Actions workflows for consistent code quality checks across
+repositories.
 
 ## Available Workflows
 
@@ -8,14 +9,17 @@ This repository provides reusable workflows for:
 
 - **Prettier Check** - Validates code formatting with Prettier
 - **Markdown Lint** - Lints Markdown files using rumdl
-- **Conventional Commit Check** - Validates commit messages follow conventional commit format
-- **PR Checks** - Combined workflow that runs all checks (or selected ones) with draft PR handling
+- **Conventional Commit Check** - Validates commit messages follow conventional
+  commit format
+- **PR Checks** - Combined workflow that runs all checks (or selected ones) with
+  draft PR handling
 
 ## Usage
 
 ### Option 1: Combined Workflow (Recommended for Simple Setup)
 
-Use the combined `pr-checks.yml` workflow to run all checks at once. This workflow automatically handles draft PRs and runs all checks by default.
+Use the combined `pr-checks.yml` workflow to run all checks at once. This
+workflow automatically handles draft PRs and runs all checks by default.
 
 #### Basic Usage
 
@@ -73,7 +77,8 @@ jobs:
 
 **Requirements:**
 
-- Prettier configuration file (`.prettierrc`, `.prettierrc.json`, etc.) or `prettier` config in `package.json`
+- Prettier configuration file (`.prettierrc`, `.prettierrc.json`, etc.) or
+  `prettier` config in `package.json`
 
 #### Markdown Lint
 
@@ -105,9 +110,12 @@ jobs:
 
 **Requirements:**
 
-- Commitlint configuration file (`.commitlintrc.json`, etc.) or `commitlint` config in `package.json`
-- If no config exists, the workflow will create a default `.commitlintrc.json` file
-- `package.json` is required because the workflow installs `@commitlint/config-conventional` as a dev dependency
+- Commitlint configuration file (`.commitlintrc.json`, etc.) or `commitlint`
+  config in `package.json`
+- If no config exists, the workflow will create a default `.commitlintrc.json`
+  file
+- `package.json` is required because the workflow installs
+  `@commitlint/config-conventional` as a dev dependency
 
 ## Workflow Details
 
