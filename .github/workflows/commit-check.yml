@@ -22,7 +22,9 @@ jobs:
           version: 9
 
       - name: Install commitlint
-        run: pnpm add -g @commitlint/cli @commitlint/config-conventional
+        run: |
+          pnpm add -g @commitlint/cli
+          pnpm add -D @commitlint/config-conventional
 
       - name: Create commitlint config if missing
         run: |
