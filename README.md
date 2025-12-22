@@ -66,7 +66,7 @@ jobs:
   checks:
     uses: holdex/github-actions/.github/workflows/pr-checks.yml@main
     with:
-      package_json_path: "frontend/package.json"
+      package_json_file: "frontend/package.json"
 ```
 
 ### Option 2: Individual Workflows
@@ -89,7 +89,7 @@ jobs:
 
 **Inputs:**
 
-- `package_json_path` (string, default: `"package.json"`) - Path to package.json
+- `package_json_file` (string, default: `"package.json"`) - Path to package.json
   file
 
 **Requirements:**
@@ -127,7 +127,7 @@ jobs:
 
 **Inputs:**
 
-- `package_json_path` (string, default: `"package.json"`) - Path to package.json
+- `package_json_file` (string, default: `"package.json"`) - Path to package.json
   file
 
 **Requirements:**
@@ -154,7 +154,7 @@ The combined workflow includes:
 - `run-prettier` (boolean, default: `true`) - Run Prettier check
 - `run-markdown` (boolean, default: `true`) - Run Markdown lint
 - `run-commits` (boolean, default: `true`) - Run commit check
-- `package_json_path` (string, default: `"package.json"`) - Path to package.json
+- `package_json_file` (string, default: `"package.json"`) - Path to package.json
   file (passed to prettier and commit-check workflows)
 
 ### Prettier Check (`prettier.yml`)
@@ -186,5 +186,5 @@ The combined workflow includes:
   - The workflows read the pnpm version from your `package.json`
     `packageManager` field (e.g., `"packageManager": "pnpm@9.0.0"`)
   - If not specified, defaults to pnpm 10
-  - You can specify a custom `package.json` path via the `package_json_path`
+  - You can specify a custom `package.json` path via the `package_json_file`
     input if needed
