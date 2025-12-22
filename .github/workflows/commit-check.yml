@@ -25,7 +25,7 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
-          package_json_file: ${{ inputs.package_json_file }}
+          package_json_file: ${{ inputs.package_json_path || 'package.json' }}
 
       - name: Install commitlint
         run: |
@@ -34,7 +34,7 @@ jobs:
 
       - name: Create commitlint config if missing
         run: |
-          if [ ! -f .commitlintrc.json ] && [ ! -f .commitlintrc.js ] && [ ! -f .commitlintrc.yml ] && [ ! -f .commitlintrc.yaml ] && ! grep -q '"commitlint"' "${{ inputs.package_json_file }}" 2>/dev/null; then
+          if [ ! -f .commitlintrc.json ] && [ ! -f .commitlintrc.js ] && [ ! -f .commitlintrc.yml ] && [ ! -f .commitlintrc.yaml ] && ! grep -q '"commitlint"' "${{ inputs.package_json_path || 'package.json' }}" 2>/dev/null; then
             echo '{"extends": ["@commitlint/config-conventional"]}' > .commitlintrc.json
           fi
 
