@@ -57,18 +57,6 @@ jobs:
       run-commits: true
 ```
 
-#### Custom package.json Path
-
-If your `package.json` is not in the repository root, specify the path:
-
-```yaml
-jobs:
-  checks:
-    uses: holdex/github-actions/.github/workflows/pr-checks.yml@main
-    with:
-      package_json_file: "frontend/package.json"
-```
-
 ### Option 2: Individual Workflows
 
 Use individual workflows for granular control over when each check runs.
@@ -86,11 +74,6 @@ jobs:
   prettier:
     uses: holdex/github-actions/.github/workflows/prettier.yml@main
 ```
-
-**Inputs:**
-
-- `package_json_file` (string, default: `"package.json"`) - Path to package.json
-  file
 
 **Requirements:**
 
@@ -125,11 +108,6 @@ jobs:
     uses: holdex/github-actions/.github/workflows/commit-check.yml@main
 ```
 
-**Inputs:**
-
-- `package_json_file` (string, default: `"package.json"`) - Path to package.json
-  file
-
 **Requirements:**
 
 - Commitlint configuration file (`.commitlintrc.json`, etc.) or `commitlint`
@@ -154,8 +132,6 @@ The combined workflow includes:
 - `run-prettier` (boolean, default: `true`) - Run Prettier check
 - `run-markdown` (boolean, default: `true`) - Run Markdown lint
 - `run-commits` (boolean, default: `true`) - Run commit check
-- `package_json_file` (string, default: `"package.json"`) - Path to package.json
-  file (passed to prettier and commit-check workflows)
 
 ### Prettier Check (`prettier.yml`)
 
@@ -181,5 +157,3 @@ The combined workflow includes:
 - Node.js 22+
 - Bun (installed automatically in workflows)
   - Uses the latest version of Bun
-  - You can specify a custom `package.json` path via the `package_json_file`
-    input if needed
