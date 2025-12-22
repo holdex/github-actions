@@ -38,14 +38,14 @@ jobs:
   prettier:
     needs: check-draft
     if: needs.check-draft.outputs.should-run == 'true' && (inputs.run-prettier != false || github.event_name != 'workflow_call')
-    uses: ./.github/workflows/prettier.yml@main
+    uses: ./.github/workflows/prettier.yml
 
   markdown:
     needs: check-draft
     if: needs.check-draft.outputs.should-run == 'true' && (inputs.run-markdown != false || github.event_name != 'workflow_call')
-    uses: ./.github/workflows/markdown-check.yml@main
+    uses: ./.github/workflows/markdown-check.yml
 
   commits:
     needs: check-draft
     if: needs.check-draft.outputs.should-run == 'true' && (inputs.run-commits != false || github.event_name != 'workflow_call')
-    uses: ./.github/workflows/commit-check.yml@main
+    uses: ./.github/workflows/commit-check.yml
