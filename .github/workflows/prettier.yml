@@ -23,7 +23,9 @@ jobs:
 
           if [ "$HAS_CONFIG" = false ] && ! grep -q '"prettier"' "package.json" 2>/dev/null; then
             echo "::error file=.prettierrc::No Prettier configuration file found."
-            echo "Please create a .prettierrc file or add prettier config to package.json."
+            echo "A Prettier config file is required to ensure consistent formatting across all developers."
+            echo "Without a shared config, each developer's local Prettier settings will differ, causing unnecessary formatting changes in commits."
+            echo "Please create a .prettierrc file in your repository root."
             exit 1
           fi
 
