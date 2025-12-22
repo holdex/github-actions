@@ -26,7 +26,6 @@ jobs:
         uses: pnpm/action-setup@v4
         with:
           package_json_path: ${{ inputs.package_json_path }}
-          version: 10
 
       - name: Install commitlint
         run: |

@@ -57,6 +57,18 @@ jobs:
       run-commits: true
 ```
 
+#### Custom package.json Path
+
+If your `package.json` is not in the repository root, specify the path:
+
+```yaml
+jobs:
+  checks:
+    uses: holdex/github-actions/.github/workflows/pr-checks.yml@main
+    with:
+      package_json_path: "frontend/package.json"
+```
+
 ### Option 2: Individual Workflows
 
 Use individual workflows for granular control over when each check runs.
@@ -74,6 +86,11 @@ jobs:
   prettier:
     uses: holdex/github-actions/.github/workflows/prettier.yml@main
 ```
+
+**Inputs:**
+
+- `package_json_path` (string, default: `"package.json"`) - Path to package.json
+  file
 
 **Requirements:**
 
@@ -108,6 +125,11 @@ jobs:
     uses: holdex/github-actions/.github/workflows/commit-check.yml@main
 ```
 
+**Inputs:**
+
+- `package_json_path` (string, default: `"package.json"`) - Path to package.json
+  file
+
 **Requirements:**
 
 - Commitlint configuration file (`.commitlintrc.json`, etc.) or `commitlint`
@@ -132,12 +154,16 @@ The combined workflow includes:
 - `run-prettier` (boolean, default: `true`) - Run Prettier check
 - `run-markdown` (boolean, default: `true`) - Run Markdown lint
 - `run-commits` (boolean, default: `true`) - Run commit check
+- `package_json_path` (string, default: `"package.json"`) - Path to package.json
+  file (passed to prettier and commit-check workflows)
 
 ### Prettier Check (`prettier.yml`)
 
 - Validates that a Prettier configuration exists
 - Checks code formatting using Prettier
 - Supports all Prettier-supported file types
+- Reads pnpm version from `package.json` `packageManager` field (falls back to
+  pnpm 10)
 
 ### Markdown Lint (`markdown-check.yml`)
 
@@ -150,8 +176,15 @@ The combined workflow includes:
 - Validates PR titles follow conventional commit format
 - Validates all commit messages in the PR
 - Creates default commitlint config if missing (requires `package.json`)
+- Reads pnpm version from `package.json` `packageManager` field (falls back to
+  pnpm 10)
 
 ## Requirements
 
 - Node.js 22+
 - pnpm (installed automatically in workflows)
+  - The workflows read the pnpm version from your `package.json`
+    `packageManager` field (e.g., `"packageManager": "pnpm@9.0.0"`)
+  - If not specified, defaults to pnpm 10
+  - You can specify a custom `package.json` path via the `package_json_path`
+    input if needed
