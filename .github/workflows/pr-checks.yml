@@ -37,7 +37,7 @@ jobs:
 
   prettier:
     needs: check-draft
-    if: needs.check-draft.outputs.should-run == 'true' && (inputs.run-prettier != false || github.event_name != 'workflow_call')
+    if: needs.check-draft.outputs.should-run == 'true' && inputs.run-prettier != false
     uses: ./.github/workflows/prettier.yml
 
   markdown:
