@@ -9,8 +9,8 @@ This repository provides reusable workflows for:
 
 - **Prettier Check** - Validates code formatting with Prettier
 - **Markdown Lint** - Lints Markdown files using rumdl
-- **Conventional Commit Check** - Validates commit messages follow conventional
-  commit format
+- **Conventional Commit Check for PR Title** - Validates PR titles follow
+  conventional commit format
 - **PR Checks** - Combined workflow that runs all checks (or selected ones) with
   draft PR handling
 
@@ -173,7 +173,6 @@ The combined workflow includes:
 ### Conventional Commit Check (`commit-check.yml`)
 
 - Validates PR titles follow conventional commit format
-- Validates all commit messages in the PR
 - Creates default commitlint config if missing (requires `package.json`)
 - Uses Bun for package management
 
