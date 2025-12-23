@@ -1,0 +1,23 @@
+name: Markdown Lint
+
+on:
+  workflow_call:
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install rumdl pre-compiled binary
+        # EXPECTED_SHA256 is obtained from `curl -sL $DOWNLOAD_URL | sha256sum`
+        run: |
+          DOWNLOAD_URL="https://github.com/rvben/rumdl/releases/download/v0.0.185/rumdl-v0.0.185-x86_64-unknown-linux-gnu.tar.gz"
+          EXPECTED_SHA256="5e6f28fa4935fb7d022c4f2d64f82b12206038d17e6570466afe7d7a3b135fba"
+          curl -sL $DOWNLOAD_URL -o /tmp/rumdl.tar.gz
+          echo "$EXPECTED_SHA256 /tmp/rumdl.tar.gz" | sha256sum -c -
+          tar -xzf /tmp/rumdl.tar.gz -C /usr/local/bin/
+          chmod +x /usr/local/bin/rumdl
+
+      - name: Lint Markdown
+        run: rumdl check --output-format github .

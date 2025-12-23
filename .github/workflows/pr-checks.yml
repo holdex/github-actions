@@ -1,0 +1,55 @@
+name: PR Checks
+
+on:
+  workflow_call:
+    inputs:
+      run-prettier:
+        description: "Run Prettier check"
+        required: false
+        type: boolean
+        default: true
+      run-markdown:
+        description: "Run Markdown check"
+        required: false
+        type: boolean
+        default: true
+      run-commits:
+        description: "Run Commit check"
+        required: false
+        type: boolean
+        default: true
+
+jobs:
+  check-draft:
+    runs-on: ubuntu-latest
+    outputs:
+      should-run: ${{ steps.check.outputs.should-run }}
+    steps:
+      - id: check
+        run: |
+          if [ "${{ github.event_name }}" != "pull_request" ] || [ "${{ github.event.pull_request.draft }}" != "true" ]; then
+            echo "should-run=true" >> $GITHUB_OUTPUT
+          else
+            echo "should-run=false" >> $GITHUB_OUTPUT
+          fi
+
+  prettier:
+    needs: check-draft
+    if:
+      needs.check-draft.outputs.should-run == 'true' && inputs.run-prettier !=
+      false
+    uses: ./.github/workflows/prettier.yml
+
+  markdown:
+    needs: check-draft
+    if:
+      needs.check-draft.outputs.should-run == 'true' && inputs.run-markdown !=
+      false
+    uses: ./.github/workflows/markdown-check.yml
+
+  commits:
+    needs: check-draft
+    if:
+      needs.check-draft.outputs.should-run == 'true' && inputs.run-commits !=
+      false
+    uses: ./.github/workflows/commit-check.yml
