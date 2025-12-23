@@ -22,7 +22,8 @@ jobs:
       - name: Create commitlint config if missing
         run: |
           if [ ! -f .commitlintrc.json ] && [ ! -f .commitlintrc.js ] && [ ! -f .commitlintrc.yml ] && [ ! -f .commitlintrc.yaml ] && ! grep -q '"commitlint"' "package.json" 2>/dev/null; then
-            echo '{"extends": ["@commitlint/config-conventional"]}' > .commitlintrc.json
+            echo "extends:" > .commitlintrc.yml
+            echo "  - '@commitlint/config-conventional'" >> .commitlintrc.yml
           fi
 
       - name: Check PR title
