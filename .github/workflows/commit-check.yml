@@ -14,17 +14,32 @@ jobs:
         with:
           bun-version: latest
 
-      - name: Install commitlint
+      - name: Check for commitlint config and install dependencies
+        id: commitlint-config
+        run: |
+          if [ -f .commitlintrc.json ] || [ -f .commitlintrc.js ] || [ -f .commitlintrc.yml ] || [ -f .commitlintrc.yaml ] || grep -q '"commitlint"' "package.json" 2>/dev/null; then
+            echo "has-config=true" >> $GITHUB_OUTPUT
+          else
+            echo "has-config=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Install dependencies if config exists
+        if: steps.commitlint-config.outputs.has-config == 'true'
+        run: |
+          bun i -g @commitlint/cli
+          bun i
+
+      - name: Install commitlint globally if no config
+        if: steps.commitlint-config.outputs.has-config == 'false'
         run: |
           bun i -g @commitlint/cli
           bun i -D @commitlint/config-conventional
 
       - name: Create commitlint config if missing
+        if: steps.commitlint-config.outputs.has-config == 'false'
         run: |
-          if [ ! -f .commitlintrc.json ] && [ ! -f .commitlintrc.js ] && [ ! -f .commitlintrc.yml ] && [ ! -f .commitlintrc.yaml ] && ! grep -q '"commitlint"' "package.json" 2>/dev/null; then
-            echo "extends:" > .commitlintrc.yml
-            echo "  - '@commitlint/config-conventional'" >> .commitlintrc.yml
-          fi
+          echo "extends:" > .commitlintrc.yml
+          echo "  - '@commitlint/config-conventional'" >> .commitlintrc.yml
 
       - name: Check PR title
         if: github.event_name == 'pull_request'
