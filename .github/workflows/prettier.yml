@@ -37,5 +37,8 @@ jobs:
       - name: Install Prettier
         run: bun i -g prettier
 
+      - name: Install Dependencies
+        run: bun i
+
       - name: Check formatting
         run: prettier --check .
