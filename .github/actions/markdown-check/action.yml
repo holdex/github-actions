@@ -6,11 +6,16 @@ inputs:
     description: Optional pre-resolved changed files list
     required: false
     default: ""
+  setup-bun:
+    description: Setup Bun runtime in this action
+    required: false
+    default: "true"
 
 runs:
   using: composite
   steps:
     - name: Setup Bun
+      if: inputs.setup-bun == 'true'
       uses: oven-sh/setup-bun@v2
       with:
         bun-version: latest
