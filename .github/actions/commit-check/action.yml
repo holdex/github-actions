@@ -65,9 +65,9 @@ runs:
       shell: bash
       run: |
         if [ "${{ inputs.package-manager }}" = "pnpm" ]; then
-          pnpm install
+          pnpm install --frozen-lockfile
         else
-          bun i
+          bun i --frozen-lockfile
         fi
 
     - name: Install commitlint globally if no config

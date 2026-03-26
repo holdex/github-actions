@@ -90,9 +90,9 @@ runs:
       run: |
         if [ -f package.json ]; then
           if [ "${{ inputs.package-manager }}" = "pnpm" ]; then
-            pnpm install
+            pnpm install --frozen-lockfile
           else
-            bun i
+            bun i --frozen-lockfile
           fi
         else
           echo "No package.json found, skipping dependency installation."
