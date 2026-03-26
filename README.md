@@ -78,6 +78,7 @@ on:
 
 jobs:
   checks:
+    if: github.event.pull_request.draft == false
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -107,6 +108,7 @@ on:
 
 jobs:
   checks:
+    if: github.event.pull_request.draft == false
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
