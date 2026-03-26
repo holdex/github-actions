@@ -11,15 +11,17 @@ This repository provides reusable workflows for:
 - **Markdown Lint** - Lints Markdown files using rumdl
 - **Conventional Commit Check for PR Title** - Validates PR titles follow
   conventional commit format
-- **PR Checks** - Combined workflow that runs all checks (or selected ones) with
-  draft PR handling
+- **PR Checks** - Combined reusable workflow that runs selected checks in one job
+  with draft PR handling
+- **PR Checks Composite Action** - Step-level composite action for running checks
+  in the same job as custom project steps
 
 ## Usage
 
-### Option 1: Combined Workflow (Recommended for Simple Setup)
+### Option 1: Combined Reusable Workflow
 
-Use the combined `pr-checks.yml` workflow to run all checks at once. This
-workflow automatically handles draft PRs and runs all checks by default.
+Use the combined `pr-checks.yml` reusable workflow to run all checks at once.
+This workflow automatically handles draft PRs and runs all checks by default.
 
 #### Basic Usage
 
@@ -55,9 +57,70 @@ jobs:
       run-prettier: true
       run-markdown: false # Skip markdown check
       run-commits: true
+      package-manager: bun # Optional: bun (default) or pnpm
 ```
 
-### Option 2: Individual Workflows
+### Option 2: Composite Action (Recommended)
+
+Use composite actions when you want project-specific steps in the same job.
+
+#### Combined Action Example (`pr-checks`)
+
+```yaml
+name: PR Checks
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize, ready_for_review]
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: holdex/github-actions/.github/actions/prettier@main
+        with:
+          package-manager: pnpm
+          setup-runtime: "true"
+
+      - name: Run project checks
+        run: |
+          pnpm install --frozen-lockfile
+          pnpm lint
+          pnpm check
+```
+
+#### Direct Action Example (Prettier)
+
+```yaml
+name: Prettier Check
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize]
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: holdex/github-actions/.github/actions/prettier@main
+        with:
+          package-manager: pnpm
+          setup-runtime: "true"
+
+      - name: Run project checks
+        run: |
+          pnpm install --frozen-lockfile
+          pnpm lint
+          pnpm check
+```
+
+Make sure `actions/checkout` runs before the action step.
+
+### Option 3: Individual Workflows
 
 Use individual workflows for granular control over when each check runs.
 
@@ -74,11 +137,6 @@ jobs:
   prettier:
     uses: holdex/github-actions/.github/workflows/prettier.yml@main
 ```
-
-**Requirements:**
-
-- Prettier configuration file (`.prettierrc`, `.prettierrc.json`, etc.) or
-  `prettier` config in `package.json`
 
 #### Markdown Lint
 
@@ -112,7 +170,8 @@ jobs:
 
 - Commitlint configuration file (`.commitlintrc.json`, etc.) or `commitlint`
   config in `package.json`
-- If no config exists, the workflow will create a default `.commitlintrc.json`
+- If no config exists, the workflow/action will create a default
+  `.commitlintrc.yml`
   file
 
 ## Workflow Details
@@ -124,31 +183,48 @@ The combined workflow includes:
 - **Draft PR handling** - Automatically skips checks for draft PRs
 - **Selective execution** - Control which checks run via inputs
 - **Default behavior** - Runs all checks if no inputs specified
+- **Single job execution** - Runs checks in one job to avoid tiny per-check jobs
 
 **Inputs:**
 
 - `run-prettier` (boolean, default: `true`) - Run Prettier check
 - `run-markdown` (boolean, default: `true`) - Run Markdown lint
 - `run-commits` (boolean, default: `true`) - Run commit check
+- `package-manager` (string, default: `bun`) - Package manager (`bun` or `pnpm`)
+
+### PR Checks Composite Action (`.github/actions/pr-checks`)
+
+- Same inputs as `pr-checks.yml`
+- Supports `package-manager` (`bun` or `pnpm`)
+- Runs as a step inside your existing job
+- Lets you add custom steps before/after checks in the same job
+
+## Reusable Workflow vs Composite Action
+
+- Use **reusable workflow** for easiest adoption and stable interface across
+  repos
+- Use **composite action** when you need custom project steps in the same job
+- Composite actions can reduce billed minute waste from tiny separate jobs
+  because everything runs on one runner job
 
 ### Prettier Check (`prettier.yml`)
 
 - Validates that a Prettier configuration exists
-- Checks code formatting using Prettier
+- Checks formatting on changed files using Prettier
 - Supports all Prettier-supported file types
-- Uses Bun for package management
+- Supports Bun or pnpm for package management
 
 ### Markdown Lint (`markdown-check.yml`)
 
-- Uses `rumdl` v0.0.185 for fast Markdown linting
-- Checks all Markdown files in the repository
+- Installs `rumdl` from npm using Bun or pnpm
+- Lints changed Markdown files (`.md` and `.mdx`)
 - Reports issues with GitHub annotations
 
 ### Conventional Commit Check (`commit-check.yml`)
 
 - Validates PR titles follow conventional commit format
 - Creates default commitlint config if missing (requires `package.json`)
-- Uses Bun for package management
+- Supports Bun or pnpm for package management
 
 ## Requirements
 
