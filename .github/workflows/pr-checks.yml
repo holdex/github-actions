@@ -20,36 +20,14 @@ on:
         default: true
 
 jobs:
-  check-draft:
+  checks:
     runs-on: ubuntu-latest
-    outputs:
-      should-run: ${{ steps.check.outputs.should-run }}
     steps:
-      - id: check
-        run: |
-          if [ "${{ github.event_name }}" != "pull_request" ] || [ "${{ github.event.pull_request.draft }}" != "true" ]; then
-            echo "should-run=true" >> $GITHUB_OUTPUT
-          else
-            echo "should-run=false" >> $GITHUB_OUTPUT
-          fi
+      - uses: actions/checkout@v4
 
-  prettier:
-    needs: check-draft
-    if:
-      needs.check-draft.outputs.should-run == 'true' && inputs.run-prettier !=
-      false
-    uses: ./.github/workflows/prettier.yml
-
-  markdown:
-    needs: check-draft
-    if:
-      needs.check-draft.outputs.should-run == 'true' && inputs.run-markdown !=
-      false
-    uses: ./.github/workflows/markdown-check.yml
-
-  commits:
-    needs: check-draft
-    if:
-      needs.check-draft.outputs.should-run == 'true' && inputs.run-commits !=
-      false
-    uses: ./.github/workflows/commit-check.yml
+      - name: Run selected PR checks
+        uses: ./.github/actions/pr-checks
+        with:
+          run-prettier: ${{ inputs.run-prettier }}
+          run-markdown: ${{ inputs.run-markdown }}
+          run-commits: ${{ inputs.run-commits }}
