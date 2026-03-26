@@ -12,7 +12,7 @@ jobs:
       - name: Check for Prettier config
         id: prettier-config
         run: |
-          CONFIG_FILES=".prettierrc .prettierrc.json .prettierrc.js .prettierrc.yaml .prettierrc.yml .prettierrc.toml prettier.config.js prettier.config.mjs"
+          CONFIG_FILES=".prettierrc .prettierrc.json .prettierrc.js .prettierrc.yaml .prettierrc.yml .prettierrc.toml prettier.config.js prettier.config.mjs prettier.config.cjs"
           HAS_CONFIG=false
 
           for file in $CONFIG_FILES; do
