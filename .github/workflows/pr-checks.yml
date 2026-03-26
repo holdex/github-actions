@@ -31,8 +31,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Checkout shared actions repository
+        uses: actions/checkout@v4
+        with:
+          repository: holdex/github-actions
+          ref: ${{ github.workflow_sha }}
+          path: .github-actions-source
+
       - name: Run selected PR checks
-        uses: ./.github/actions/pr-checks
+        uses: ./.github-actions-source/.github/actions/pr-checks
         with:
           run-prettier: ${{ inputs.run-prettier }}
           run-markdown: ${{ inputs.run-markdown }}

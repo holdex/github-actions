@@ -14,6 +14,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: ./.github/actions/prettier
+
+      - name: Checkout shared actions repository
+        uses: actions/checkout@v4
+        with:
+          repository: holdex/github-actions
+          ref: ${{ github.workflow_sha }}
+          path: .github-actions-source
+
+      - uses: ./.github-actions-source/.github/actions/prettier
         with:
           package-manager: ${{ inputs.package-manager }}
