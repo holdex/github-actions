@@ -6,19 +6,23 @@ inputs:
     description: Optional pre-resolved changed files list
     required: false
     default: ""
-  setup-bun:
-    description: Setup Bun runtime in this action
+  setup-runtime:
+    description: Setup package manager runtime in this action
     required: false
     default: "true"
+  package-manager:
+    description: Package manager to use (bun or pnpm)
+    required: false
+    default: "bun"
 
 runs:
   using: composite
   steps:
-    - name: Setup Bun
-      if: inputs.setup-bun == 'true'
-      uses: oven-sh/setup-bun@v2
+    - name: Setup runtime
+      uses: ./.github/actions/setup-runtime
       with:
-        bun-version: latest
+        setup-runtime: ${{ inputs.setup-runtime }}
+        package-manager: ${{ inputs.package-manager }}
 
     - name: Get changed markdown files
       id: changed-markdown-files
@@ -58,7 +62,12 @@ runs:
 
     - name: Install rumdl
       shell: bash
-      run: bun i -g rumdl
+      run: |
+        if [ "${{ inputs.package-manager }}" = "pnpm" ]; then
+          pnpm add -g rumdl
+        else
+          bun i -g rumdl
+        fi
 
     - name: Skip when no markdown files changed
       if: steps.resolved-markdown-files.outputs.any-changed != 'true'

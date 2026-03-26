@@ -6,10 +6,14 @@ inputs:
     description: Optional pre-resolved changed files list
     required: false
     default: ""
-  setup-bun:
-    description: Setup Bun runtime in this action
+  setup-runtime:
+    description: Setup package manager runtime in this action
     required: false
     default: "true"
+  package-manager:
+    description: Package manager to use (bun or pnpm)
+    required: false
+    default: "bun"
 
 runs:
   using: composite
@@ -38,11 +42,11 @@ runs:
 
         echo "has-config=true" >> "$GITHUB_OUTPUT"
 
-    - name: Setup Bun
-      if: inputs.setup-bun == 'true'
-      uses: oven-sh/setup-bun@v2
+    - name: Setup runtime
+      uses: ./.github/actions/setup-runtime
       with:
-        bun-version: latest
+        setup-runtime: ${{ inputs.setup-runtime }}
+        package-manager: ${{ inputs.package-manager }}
 
     - name: Get changed files
       id: changed-files
@@ -63,14 +67,23 @@ runs:
 
     - name: Install Prettier
       shell: bash
-      run: bun i -g prettier
+      run: |
+        if [ "${{ inputs.package-manager }}" = "pnpm" ]; then
+          pnpm add -g prettier
+        else
+          bun i -g prettier
+        fi
 
     - name: Install dependencies
       if: steps.prettier-config.outputs.has-config == 'true'
       shell: bash
       run: |
         if [ -f package.json ]; then
-          bun i
+          if [ "${{ inputs.package-manager }}" = "pnpm" ]; then
+            pnpm install
+          else
+            bun i
+          fi
         else
           echo "No package.json found, skipping dependency installation."
         fi

@@ -14,15 +14,19 @@ inputs:
     description: Run Commit check
     required: false
     default: "true"
+  package-manager:
+    description: Package manager to use (bun or pnpm)
+    required: false
+    default: "bun"
 
 runs:
   using: composite
   steps:
-    - name: Setup Bun
+    - name: Setup runtime
       if: (github.event_name != 'pull_request' || github.event.pull_request.draft != true) && (inputs.run-prettier != 'false' || inputs.run-markdown != 'false' || inputs.run-commits != 'false')
-      uses: oven-sh/setup-bun@v2
+      uses: ./.github/actions/setup-runtime
       with:
-        bun-version: latest
+        package-manager: ${{ inputs.package-manager }}
 
     - name: Get changed files
       id: changed-files
@@ -34,17 +38,20 @@ runs:
       uses: ./.github/actions/prettier
       with:
         changed-files: ${{ steps.changed-files.outputs.all_changed_files }}
-        setup-bun: "false"
+        setup-runtime: "false"
+        package-manager: ${{ inputs.package-manager }}
 
     - name: Run Markdown check
       if: (github.event_name != 'pull_request' || github.event.pull_request.draft != true) && inputs.run-markdown != 'false'
       uses: ./.github/actions/markdown-check
       with:
         changed-files: ${{ steps.changed-files.outputs.all_changed_files }}
-        setup-bun: "false"
+        setup-runtime: "false"
+        package-manager: ${{ inputs.package-manager }}
 
     - name: Run Commit check
       if: (github.event_name != 'pull_request' || github.event.pull_request.draft != true) && inputs.run-commits != 'false'
       uses: ./.github/actions/commit-check
       with:
-        setup-bun: "false"
+        setup-runtime: "false"
+        package-manager: ${{ inputs.package-manager }}

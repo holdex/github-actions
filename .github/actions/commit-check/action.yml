@@ -2,19 +2,23 @@ name: Conventional Commit Check for PR Title
 description: Validate pull request title with commitlint
 
 inputs:
-  setup-bun:
-    description: Setup Bun runtime in this action
+  setup-runtime:
+    description: Setup package manager runtime in this action
     required: false
     default: "true"
+  package-manager:
+    description: Package manager to use (bun or pnpm)
+    required: false
+    default: "bun"
 
 runs:
   using: composite
   steps:
-    - name: Setup Bun
-      if: inputs.setup-bun == 'true'
-      uses: oven-sh/setup-bun@v2
+    - name: Setup runtime
+      uses: ./.github/actions/setup-runtime
       with:
-        bun-version: latest
+        setup-runtime: ${{ inputs.setup-runtime }}
+        package-manager: ${{ inputs.package-manager }}
 
     - name: Check for commitlint config and install dependencies
       id: commitlint-config
@@ -30,15 +34,25 @@ runs:
       if: steps.commitlint-config.outputs.has-config == 'true'
       shell: bash
       run: |
-        bun i -g @commitlint/cli
-        bun i
+        if [ "${{ inputs.package-manager }}" = "pnpm" ]; then
+          pnpm add -g @commitlint/cli
+          pnpm install
+        else
+          bun i -g @commitlint/cli
+          bun i
+        fi
 
     - name: Install commitlint globally if no config
       if: steps.commitlint-config.outputs.has-config == 'false'
       shell: bash
       run: |
-        bun i -g @commitlint/cli
-        bun i -D @commitlint/config-conventional
+        if [ "${{ inputs.package-manager }}" = "pnpm" ]; then
+          pnpm add -g @commitlint/cli
+          pnpm add -D @commitlint/config-conventional
+        else
+          bun i -g @commitlint/cli
+          bun i -D @commitlint/config-conventional
+        fi
 
     - name: Create commitlint config if missing
       if: steps.commitlint-config.outputs.has-config == 'false'
