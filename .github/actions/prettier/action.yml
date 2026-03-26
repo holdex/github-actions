@@ -1,6 +1,12 @@
 name: Prettier Check
 description: Validate Prettier configuration and formatting
 
+inputs:
+  changed-files:
+    description: Optional pre-resolved changed files list
+    required: false
+    default: ""
+
 runs:
   using: composite
   steps:
@@ -35,7 +41,20 @@ runs:
 
     - name: Get changed files
       id: changed-files
+      if: inputs.changed-files == ''
       uses: tj-actions/changed-files@22103cc46bda19c2b464ffe86db46df6922fd323
+
+    - name: Resolve changed files
+      id: resolved-files
+      shell: bash
+      run: |
+        if [ -n "${{ inputs.changed-files }}" ]; then
+          echo "any-changed=true" >> "$GITHUB_OUTPUT"
+          echo "files=${{ inputs.changed-files }}" >> "$GITHUB_OUTPUT"
+        else
+          echo "any-changed=${{ steps.changed-files.outputs.any_changed }}" >> "$GITHUB_OUTPUT"
+          echo "files=${{ steps.changed-files.outputs.all_changed_files }}" >> "$GITHUB_OUTPUT"
+        fi
 
     - name: Install Prettier
       shell: bash
@@ -52,11 +71,11 @@ runs:
         fi
 
     - name: Skip when no files changed
-      if: steps.changed-files.outputs.any_changed != 'true'
+      if: steps.resolved-files.outputs.any-changed != 'true'
       shell: bash
       run: echo "No changed files to check with Prettier."
 
     - name: Check formatting
-      if: steps.changed-files.outputs.any_changed == 'true'
+      if: steps.resolved-files.outputs.any-changed == 'true'
       shell: bash
-      run: prettier --check --ignore-unknown ${{ steps.changed-files.outputs.all_changed_files }}
+      run: prettier --check --ignore-unknown ${{ steps.resolved-files.outputs.files }}
