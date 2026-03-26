@@ -65,7 +65,7 @@ jobs:
 
 Use individual actions when you want project-specific steps in the same job.
 
-#### Direct Action Example (Prettier)
+#### Direct Action Example (Prettier + Commit Check)
 
 ```yaml
 name: Prettier Check
@@ -85,6 +85,11 @@ jobs:
         with:
           package-manager: pnpm
           setup-runtime: "true"
+
+      - uses: holdex/github-actions/.github/actions/commit-check@<commit-sha>
+        with:
+          package-manager: pnpm
+          setup-runtime: "false"
 
       - name: Run project checks
         run: |
