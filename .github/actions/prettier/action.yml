@@ -33,6 +33,10 @@ runs:
       with:
         bun-version: latest
 
+    - name: Get changed files
+      id: changed-files
+      uses: tj-actions/changed-files@22103cc46bda19c2b464ffe86db46df6922fd323
+
     - name: Install Prettier
       shell: bash
       run: bun i -g prettier
@@ -40,8 +44,19 @@ runs:
     - name: Install dependencies
       if: steps.prettier-config.outputs.has-config == 'true'
       shell: bash
-      run: bun i
+      run: |
+        if [ -f package.json ]; then
+          bun i
+        else
+          echo "No package.json found, skipping dependency installation."
+        fi
+
+    - name: Skip when no files changed
+      if: steps.changed-files.outputs.any_changed != 'true'
+      shell: bash
+      run: echo "No changed files to check with Prettier."
 
     - name: Check formatting
+      if: steps.changed-files.outputs.any_changed == 'true'
       shell: bash
-      run: prettier --check .
+      run: prettier --check --ignore-unknown ${{ steps.changed-files.outputs.all_changed_files }}
