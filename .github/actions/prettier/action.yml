@@ -1,0 +1,47 @@
+name: Prettier Check
+description: Validate Prettier configuration and formatting
+
+runs:
+  using: composite
+  steps:
+    - name: Check for Prettier config
+      id: prettier-config
+      shell: bash
+      run: |
+        CONFIG_FILES=".prettierrc .prettierrc.json .prettierrc.js .prettierrc.yaml .prettierrc.yml .prettierrc.toml prettier.config.js prettier.config.mjs prettier.config.cjs"
+        HAS_CONFIG=false
+
+        for file in $CONFIG_FILES; do
+          if [ -f "$file" ]; then
+            HAS_CONFIG=true
+            break
+          fi
+        done
+
+        if [ "$HAS_CONFIG" = false ]; then
+          echo "::error file=.prettierrc::No Prettier configuration file found."
+          echo "A Prettier config file is required to ensure consistent formatting across all developers."
+          echo "Without a shared config, each developer's local Prettier settings will differ, causing unnecessary formatting changes in commits."
+          echo "Please create a .prettierrc file in your repository root."
+          exit 1
+        fi
+
+        echo "has-config=true" >> "$GITHUB_OUTPUT"
+
+    - name: Setup Bun
+      uses: oven-sh/setup-bun@v2
+      with:
+        bun-version: latest
+
+    - name: Install Prettier
+      shell: bash
+      run: bun i -g prettier
+
+    - name: Install dependencies
+      if: steps.prettier-config.outputs.has-config == 'true'
+      shell: bash
+      run: bun i
+
+    - name: Check formatting
+      shell: bash
+      run: prettier --check .

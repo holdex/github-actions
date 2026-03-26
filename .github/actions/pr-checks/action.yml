@@ -1,0 +1,31 @@
+name: PR Checks
+description: Run selected PR checks in a single job
+
+inputs:
+  run-prettier:
+    description: Run Prettier check
+    required: false
+    default: "true"
+  run-markdown:
+    description: Run Markdown check
+    required: false
+    default: "true"
+  run-commits:
+    description: Run Commit check
+    required: false
+    default: "true"
+
+runs:
+  using: composite
+  steps:
+    - name: Run Prettier check
+      if: (github.event_name != 'pull_request' || github.event.pull_request.draft != true) && inputs.run-prettier != 'false'
+      uses: ./.github/actions/prettier
+
+    - name: Run Markdown check
+      if: (github.event_name != 'pull_request' || github.event.pull_request.draft != true) && inputs.run-markdown != 'false'
+      uses: ./.github/actions/markdown-check
+
+    - name: Run Commit check
+      if: (github.event_name != 'pull_request' || github.event.pull_request.draft != true) && inputs.run-commits != 'false'
+      uses: ./.github/actions/commit-check
