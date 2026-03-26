@@ -13,8 +13,6 @@ This repository provides reusable workflows for:
   conventional commit format
 - **PR Checks** - Combined reusable workflow that runs selected checks in one
   job with draft PR handling
-- **PR Checks Composite Action** - Step-level composite action for running
-  checks in the same job as custom project steps
 
 ## Usage
 
@@ -65,37 +63,7 @@ jobs:
 
 ### Option 2: Composite Action
 
-Use composite actions when you want project-specific steps in the same job.
-
-#### Combined Action Example (`pr-checks`)
-
-```yaml
-name: PR Checks
-
-on:
-  pull_request:
-    types: [opened, reopened, synchronize, ready_for_review]
-
-jobs:
-  checks:
-    if: github.event.pull_request.draft == false
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: holdex/github-actions/.github/actions/pr-checks@<commit-sha>
-        with:
-          run-prettier: true
-          run-markdown: false
-          run-commits: true
-          package-manager: pnpm
-
-      - name: Run project checks
-        run: |
-          pnpm install --frozen-lockfile
-          pnpm lint
-          pnpm check
-```
+Use individual actions when you want project-specific steps in the same job.
 
 #### Direct Action Example (Prettier)
 
@@ -133,7 +101,7 @@ Use individual workflows for granular control over when each check runs.
 
 > [!NOTE]
 > If you want to run shared checks and project-specific steps in the same job,
-> use Option 2 (Composite Action) instead.
+> use Option 2 (direct composite actions) instead.
 
 #### Prettier Check
 
@@ -201,13 +169,6 @@ The combined workflow includes:
 - `run-markdown` (boolean, default: `true`) - Run Markdown lint
 - `run-commits` (boolean, default: `true`) - Run commit check
 - `package-manager` (string, default: `bun`) - Package manager (`bun` or `pnpm`)
-
-### PR Checks Composite Action (`.github/actions/pr-checks`)
-
-- Same inputs as `pr-checks.yml`
-- Supports `package-manager` (`bun` or `pnpm`)
-- Runs as a step inside your existing job
-- Lets you add custom steps before/after checks in the same job
 
 ## Reusable Workflow vs Composite Action
 

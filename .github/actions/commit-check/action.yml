@@ -14,18 +14,30 @@ inputs:
 runs:
   using: composite
   steps:
-    - name: Checkout shared actions repository
-      uses: actions/checkout@v4
-      with:
-        repository: holdex/github-actions
-        ref: ${{ github.action_ref || github.workflow_sha }}
-        path: .github-actions-source
+    - name: Validate package manager
+      if: inputs.setup-runtime == 'true'
+      shell: bash
+      run: |
+        if [ "${{ inputs.package-manager }}" != "bun" ] && [ "${{ inputs.package-manager }}" != "pnpm" ]; then
+          echo "::error::Invalid package-manager '${{ inputs.package-manager }}'. Supported values: bun, pnpm."
+          exit 1
+        fi
 
-    - name: Setup runtime
-      uses: ./.github-actions-source/.github/actions/setup-runtime
+    - name: Setup Bun
+      if: inputs.setup-runtime == 'true' && inputs.package-manager == 'bun'
+      uses: oven-sh/setup-bun@v2
       with:
-        setup-runtime: ${{ inputs.setup-runtime }}
-        package-manager: ${{ inputs.package-manager }}
+        bun-version: latest
+
+    - name: Setup Node.js
+      if: inputs.setup-runtime == 'true' && inputs.package-manager == 'pnpm'
+      uses: actions/setup-node@v4
+      with:
+        node-version: 22
+
+    - name: Setup pnpm
+      if: inputs.setup-runtime == 'true' && inputs.package-manager == 'pnpm'
+      uses: pnpm/action-setup@v4
 
     - name: Install commitlint CLI
       shell: bash
