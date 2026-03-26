@@ -82,10 +82,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: holdex/github-actions/.github/actions/prettier@<commit-sha>
+      - uses: holdex/github-actions/.github/actions/pr-checks@<commit-sha>
         with:
+          run-prettier: true
+          run-markdown: false
+          run-commits: true
           package-manager: pnpm
-          setup-runtime: "true"
 
       - name: Run project checks
         run: |
