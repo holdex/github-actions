@@ -63,7 +63,7 @@ jobs:
       package-manager: bun # Optional: bun (default) or pnpm
 ```
 
-### Option 2: Composite Action (Recommended)
+### Option 2: Composite Action
 
 Use composite actions when you want project-specific steps in the same job.
 
@@ -126,6 +126,10 @@ Make sure `actions/checkout` runs before the action step.
 ### Option 3: Individual Workflows
 
 Use individual workflows for granular control over when each check runs.
+
+> [!NOTE]
+> If you want to run shared checks and project-specific steps in the same job,
+> use Option 2 (Composite Action) instead.
 
 #### Prettier Check
 
