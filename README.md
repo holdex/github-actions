@@ -11,10 +11,10 @@ This repository provides reusable workflows for:
 - **Markdown Lint** - Lints Markdown files using rumdl
 - **Conventional Commit Check for PR Title** - Validates PR titles follow
   conventional commit format
-- **PR Checks** - Combined reusable workflow that runs selected checks in one job
-  with draft PR handling
-- **PR Checks Composite Action** - Step-level composite action for running checks
-  in the same job as custom project steps
+- **PR Checks** - Combined reusable workflow that runs selected checks in one
+  job with draft PR handling
+- **PR Checks Composite Action** - Step-level composite action for running
+  checks in the same job as custom project steps
 
 ## Usage
 
@@ -174,8 +174,7 @@ jobs:
 - Commitlint configuration file (`.commitlintrc.json`, etc.) or `commitlint`
   config in `package.json`
 - If no config exists, the workflow/action will create a default
-  `.commitlintrc.yml`
-  file
+  `.commitlintrc.yml` file
 
 ## Workflow Details
 

@@ -96,4 +96,6 @@ runs:
     - name: Check formatting
       if: steps.resolved-files.outputs.any-changed == 'true'
       shell: bash
-      run: prettier --check --ignore-unknown ${{ steps.resolved-files.outputs.files }}
+      run:
+        prettier --check --ignore-unknown ${{ steps.resolved-files.outputs.files
+        }}
