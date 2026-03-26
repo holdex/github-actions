@@ -22,12 +22,19 @@ inputs:
 runs:
   using: composite
   steps:
+    - name: Checkout shared actions repository
+      uses: actions/checkout@v4
+      with:
+        repository: holdex/github-actions
+        ref: ${{ github.action_ref || github.workflow_sha }}
+        path: .github-actions-source
+
     - name: Setup runtime
       if:
         (github.event_name != 'pull_request' || github.event.pull_request.draft
         != true) && (inputs.run-prettier != 'false' || inputs.run-markdown !=
         'false' || inputs.run-commits != 'false')
-      uses: ./.github/actions/setup-runtime
+      uses: ./.github-actions-source/.github/actions/setup-runtime
       with:
         package-manager: ${{ inputs.package-manager }}
 
@@ -43,7 +50,7 @@ runs:
       if:
         (github.event_name != 'pull_request' || github.event.pull_request.draft
         != true) && inputs.run-prettier != 'false'
-      uses: ./.github/actions/prettier
+      uses: ./.github-actions-source/.github/actions/prettier
       with:
         changed-files: ${{ steps.changed-files.outputs.all_changed_files }}
         setup-runtime: "false"
@@ -53,7 +60,7 @@ runs:
       if:
         (github.event_name != 'pull_request' || github.event.pull_request.draft
         != true) && inputs.run-markdown != 'false'
-      uses: ./.github/actions/markdown-check
+      uses: ./.github-actions-source/.github/actions/markdown-check
       with:
         changed-files: ${{ steps.changed-files.outputs.all_changed_files }}
         setup-runtime: "false"
@@ -63,7 +70,7 @@ runs:
       if:
         (github.event_name != 'pull_request' || github.event.pull_request.draft
         != true) && inputs.run-commits != 'false'
-      uses: ./.github/actions/commit-check
+      uses: ./.github-actions-source/.github/actions/commit-check
       with:
         setup-runtime: "false"
         package-manager: ${{ inputs.package-manager }}
