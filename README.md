@@ -18,6 +18,9 @@ This repository provides reusable workflows for:
 
 ## Usage
 
+Use a full commit SHA when referencing this repository in `uses:` for immutable,
+secure pinning. Replace `<commit-sha>` in examples below with a real SHA.
+
 ### Option 1: Combined Reusable Workflow
 
 Use the combined `pr-checks.yml` reusable workflow to run all checks at once.
@@ -36,7 +39,7 @@ on:
 
 jobs:
   checks:
-    uses: holdex/github-actions/.github/workflows/pr-checks.yml@main
+    uses: holdex/github-actions/.github/workflows/pr-checks.yml@<commit-sha>
 ```
 
 #### Selective Checks
@@ -52,7 +55,7 @@ on:
 
 jobs:
   checks:
-    uses: holdex/github-actions/.github/workflows/pr-checks.yml@main
+    uses: holdex/github-actions/.github/workflows/pr-checks.yml@<commit-sha>
     with:
       run-prettier: true
       run-markdown: false # Skip markdown check
@@ -79,7 +82,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: holdex/github-actions/.github/actions/prettier@main
+      - uses: holdex/github-actions/.github/actions/prettier@<commit-sha>
         with:
           package-manager: pnpm
           setup-runtime: "true"
@@ -106,7 +109,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: holdex/github-actions/.github/actions/prettier@main
+      - uses: holdex/github-actions/.github/actions/prettier@<commit-sha>
         with:
           package-manager: pnpm
           setup-runtime: "true"
@@ -135,7 +138,7 @@ on:
 
 jobs:
   prettier:
-    uses: holdex/github-actions/.github/workflows/prettier.yml@main
+    uses: holdex/github-actions/.github/workflows/prettier.yml@<commit-sha>
 ```
 
 #### Markdown Lint
@@ -149,7 +152,7 @@ on:
 
 jobs:
   markdown:
-    uses: holdex/github-actions/.github/workflows/markdown-check.yml@main
+    uses: holdex/github-actions/.github/workflows/markdown-check.yml@<commit-sha>
 ```
 
 #### Conventional Commit Check
@@ -163,7 +166,7 @@ on:
 
 jobs:
   commits:
-    uses: holdex/github-actions/.github/workflows/commit-check.yml@main
+    uses: holdex/github-actions/.github/workflows/commit-check.yml@<commit-sha>
 ```
 
 **Requirements:**
