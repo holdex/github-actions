@@ -20,11 +20,34 @@ runs:
         setup-runtime: ${{ inputs.setup-runtime }}
         package-manager: ${{ inputs.package-manager }}
 
-    - name: Check for commitlint config and install dependencies
+    - name: Install commitlint CLI
+      shell: bash
+      run: |
+        if [ "${{ inputs.package-manager }}" = "pnpm" ]; then
+          pnpm add -g @commitlint/cli
+        else
+          bun i -g @commitlint/cli
+        fi
+
+    - name: Check for commitlint config
       id: commitlint-config
       shell: bash
       run: |
-        if [ -f .commitlintrc.json ] || [ -f .commitlintrc.js ] || [ -f .commitlintrc.yml ] || [ -f .commitlintrc.yaml ] || grep -q '"commitlint"' "package.json" 2>/dev/null; then
+        CONFIG_FILES=".commitlintrc .commitlintrc.json .commitlintrc.yaml .commitlintrc.yml .commitlintrc.js .commitlintrc.cjs .commitlintrc.mjs .commitlintrc.ts .commitlintrc.cts commitlint.config.js commitlint.config.cjs commitlint.config.mjs commitlint.config.ts commitlint.config.cts"
+        HAS_CONFIG=false
+
+        for file in $CONFIG_FILES; do
+          if [ -f "$file" ]; then
+            HAS_CONFIG=true
+            break
+          fi
+        done
+
+        if [ "$HAS_CONFIG" = false ] && [ -f package.json ] && grep -q '"commitlint"' package.json; then
+          HAS_CONFIG=true
+        fi
+
+        if [ "$HAS_CONFIG" = true ]; then
           echo "has-config=true" >> "$GITHUB_OUTPUT"
         else
           echo "has-config=false" >> "$GITHUB_OUTPUT"
@@ -35,10 +58,8 @@ runs:
       shell: bash
       run: |
         if [ "${{ inputs.package-manager }}" = "pnpm" ]; then
-          pnpm add -g @commitlint/cli
           pnpm install
         else
-          bun i -g @commitlint/cli
           bun i
         fi
 
@@ -47,10 +68,8 @@ runs:
       shell: bash
       run: |
         if [ "${{ inputs.package-manager }}" = "pnpm" ]; then
-          pnpm add -g @commitlint/cli
           pnpm add -D @commitlint/config-conventional
         else
-          bun i -g @commitlint/cli
           bun i -D @commitlint/config-conventional
         fi
 
