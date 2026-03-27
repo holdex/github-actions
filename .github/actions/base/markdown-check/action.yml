@@ -70,4 +70,4 @@ runs:
     - name: Lint changed Markdown files
       if: steps.resolved-markdown-files.outputs.any-changed == 'true'
       shell: bash
-      run: rumdl check --output-format github ${{ steps.resolved-markdown-files.outputs.files }}
+      run: rumdl check --output-format github --fail-on error ${{ steps.resolved-markdown-files.outputs.files }}

@@ -78,7 +78,7 @@ Path: `/.github/actions/base/markdown-check`
 - Filters/uses markdown-only changed files.
 - Skips execution if no markdown files changed.
 - Installs `rumdl` globally using selected package manager.
-- Runs `rumdl check --output-format github` on changed markdown files.
+- Runs `rumdl check --output-format github --fail-on error` on changed markdown files.
 
 ### `base/commit-check`
 
