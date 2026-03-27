@@ -43,33 +43,6 @@ runs:
       if: inputs.setup-runtime == 'true' && inputs.package-manager == 'pnpm'
       uses: pnpm/action-setup@v4
 
-    - name: Check for Prettier config
-      id: prettier-config
-      shell: bash
-      run: |
-        probe_file=".prettier-config-probe.tmp"
-        touch "$probe_file"
-
-        if [ "${{ inputs.package-manager }}" = "pnpm" ]; then
-          CHECK_CMD="pnpm dlx prettier --find-config-path \"$probe_file\""
-        else
-          CHECK_CMD="bunx prettier --find-config-path \"$probe_file\""
-        fi
-
-        if eval "$CHECK_CMD" >/dev/null 2>&1; then
-          echo "has-config=true" >> "$GITHUB_OUTPUT"
-        else
-          echo "has-config=false" >> "$GITHUB_OUTPUT"
-          echo "::error file=.prettierrc::No Prettier configuration file found."
-          echo "A Prettier config file is required to ensure consistent formatting across all developers."
-          echo "Without a shared config, each developer's local Prettier settings will differ, causing unnecessary formatting changes in commits."
-          echo "Please create a .prettierrc file in your repository root."
-          rm -f "$probe_file"
-          exit 1
-        fi
-
-        rm -f "$probe_file"
-
     - name: Get changed files
       id: changed-files
       if: inputs.changed-files == ''
@@ -88,6 +61,7 @@ runs:
         fi
 
     - name: Install Prettier
+      if: steps.resolved-files.outputs.any-changed == 'true'
       shell: bash
       run: |
         if [ "${{ inputs.package-manager }}" = "pnpm" ]; then
@@ -96,8 +70,30 @@ runs:
           bun i -g prettier
         fi
 
+    - name: Check for Prettier config
+      id: prettier-config
+      if: steps.resolved-files.outputs.any-changed == 'true'
+      shell: bash
+      run: |
+        probe_file=".prettier-config-probe.tmp"
+        touch "$probe_file"
+
+        if prettier --find-config-path "$probe_file" >/dev/null 2>&1; then
+          echo "has-config=true" >> "$GITHUB_OUTPUT"
+        else
+          echo "has-config=false" >> "$GITHUB_OUTPUT"
+          echo "::error file=.prettierrc::No Prettier configuration file found."
+          echo "A Prettier config file is required to ensure consistent formatting across all developers."
+          echo "Without a shared config, each developer's local Prettier settings will differ, causing unnecessary formatting changes in commits."
+          echo "Please create a .prettierrc file in your repository root."
+          rm -f "$probe_file"
+          exit 1
+        fi
+
+        rm -f "$probe_file"
+
     - name: Install dependencies
-      if: steps.prettier-config.outputs.has-config == 'true'
+      if: steps.resolved-files.outputs.any-changed == 'true'
       shell: bash
       run: |
         if [ -f package.json ]; then
@@ -118,6 +114,4 @@ runs:
     - name: Check formatting
       if: steps.resolved-files.outputs.any-changed == 'true'
       shell: bash
-      run:
-        prettier --check --ignore-unknown ${{ steps.resolved-files.outputs.files
-        }}
+      run: prettier --check --ignore-unknown ${{ steps.resolved-files.outputs.files }}
