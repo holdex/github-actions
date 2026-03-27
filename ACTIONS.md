@@ -37,7 +37,7 @@ Path: `/.github/actions/base/setup-runtime`
 - Validates allowed `package-manager` values.
 - For `bun`: installs Bun runtime.
 - For `pnpm`/`npm`: installs Node.js.
-- For `pnpm`: additionally installs pnpm.
+- For `pnpm`: installs pnpm using `package.json#packageManager` when present, otherwise falls back to `latest`.
 
 ### `base/prettier`
 
