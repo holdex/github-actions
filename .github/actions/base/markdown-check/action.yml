@@ -6,10 +6,6 @@ inputs:
     description: Optional pre-resolved changed files list
     required: false
     default: ""
-  setup-runtime:
-    description: Setup package manager runtime in this action
-    required: false
-    default: "true"
   package-manager:
     description: Package manager to use (bun or pnpm)
     required: false
@@ -18,31 +14,6 @@ inputs:
 runs:
   using: composite
   steps:
-    - name: Validate package manager
-      if: inputs.setup-runtime == 'true'
-      shell: bash
-      run: |
-        if [ "${{ inputs.package-manager }}" != "bun" ] && [ "${{ inputs.package-manager }}" != "pnpm" ]; then
-          echo "::error::Invalid package-manager '${{ inputs.package-manager }}'. Supported values: bun, pnpm."
-          exit 1
-        fi
-
-    - name: Setup Bun
-      if: inputs.setup-runtime == 'true' && inputs.package-manager == 'bun'
-      uses: oven-sh/setup-bun@v2
-      with:
-        bun-version: latest
-
-    - name: Setup Node.js
-      if: inputs.setup-runtime == 'true' && inputs.package-manager == 'pnpm'
-      uses: actions/setup-node@v4
-      with:
-        node-version: 22
-
-    - name: Setup pnpm
-      if: inputs.setup-runtime == 'true' && inputs.package-manager == 'pnpm'
-      uses: pnpm/action-setup@v4
-
     - name: Get changed markdown files
       id: changed-markdown-files
       if: inputs.changed-files == ''
@@ -97,5 +68,4 @@ runs:
     - name: Lint changed Markdown files
       if: steps.resolved-markdown-files.outputs.any-changed == 'true'
       shell: bash
-      run: rumdl check --output-format github ${{
-        steps.resolved-markdown-files.outputs.files }}
+      run: rumdl check --output-format github ${{ steps.resolved-markdown-files.outputs.files }}
