@@ -31,12 +31,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Checkout shared actions repository
-        uses: actions/checkout@v4
+      - uses: holdex/github-actions/.github/actions/base/checkout@main
         with:
-          repository: holdex/github-actions
           ref: ${{ github.workflow_sha }}
-          path: .holdex-actions
 
       - name: Setup runtime
         uses: ./.holdex-actions/.github/actions/base/setup-runtime

@@ -24,6 +24,11 @@ Path: `/.github/actions/base/checkout`
 - Checks out `holdex/github-actions` into `.holdex-actions`.
 - Intended as the first step before calling local-path actions from that checkout.
 
+> [!WARNING]
+> Keep `base/checkout` backward compatible. Workflows reference the action as `.../base/checkout@main`, so any breaking change merged to this repo’s `main` will immediately break consumers.
+>
+> This also applies to the `ref` input: existing workflows often pass `ref: main` (a branch name) for the _target_ repo checkout, so don’t change `ref` semantics in a way that would require a commit SHA.
+
 ### `base/setup-runtime`
 
 Path: `/.github/actions/base/setup-runtime`

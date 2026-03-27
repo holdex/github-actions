@@ -32,7 +32,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: holdex/github-actions/.github/actions/base/checkout@<commit-sha>
+      - uses: holdex/github-actions/.github/actions/base/checkout@main
         with:
           ref: <commit-sha>
 
@@ -71,7 +71,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: holdex/github-actions/.github/actions/base/checkout@<commit-sha>
+      - uses: holdex/github-actions/.github/actions/base/checkout@main
         with:
           ref: <commit-sha>
 
