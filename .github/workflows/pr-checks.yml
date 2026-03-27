@@ -23,6 +23,11 @@ on:
         required: false
         type: string
         default: bun
+      ref:
+        description: "Ref to checkout from holdex/github-actions"
+        required: false
+        type: string
+        default: main
 
 jobs:
   checks:
@@ -30,12 +35,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: log workflow sha
-        run: 'echo "Workflow SHA: ${{ github.workflow_sha }}"'
 
-      - uses: holdex/github-actions/.github/actions/base/checkout@5d652c128c2e34b2d3966d13f295e5fa4ed29d0b
+      - uses: holdex/github-actions/.github/actions/base/checkout@${{ inputs.ref }}
         with:
-          ref: ${{ github.workflow_sha }}
+          ref: ${{ inputs.ref }}
 
       - name: Setup runtime
         uses: ./.holdex-actions/.github/actions/base/setup-runtime
