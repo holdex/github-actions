@@ -15,11 +15,11 @@ compose only the checks your repository needs in a single job.
 
 Path: `/.github/actions/base/checkout`
 
-### Inputs
+#### Inputs
 
 - `ref` (required): ref/commit to checkout from `holdex/github-actions`.
 
-### Behavior
+#### Behavior
 
 - Checks out `holdex/github-actions` into `.holdex-actions`.
 - Intended as the first step before calling local-path actions from that checkout.
@@ -33,11 +33,11 @@ Path: `/.github/actions/base/checkout`
 
 Path: `/.github/actions/base/setup-runtime`
 
-### Inputs
+#### Inputs
 
 - `package-manager` (default: `"bun"`): `bun`, `pnpm`, or `npm`.
 
-### Behavior
+#### Behavior
 
 - Validates allowed `package-manager` values.
 - For `bun`: installs Bun runtime.
@@ -48,12 +48,12 @@ Path: `/.github/actions/base/setup-runtime`
 
 Path: `/.github/actions/base/prettier`
 
-### Inputs
+#### Inputs
 
 - `changed-files` (default: `""`): optional pre-resolved changed files list.
 - `package-manager` (default: `"bun"`): `bun`, `pnpm`, or `npm`.
 
-### Behavior
+#### Behavior
 
 - Discovers changed files itself if `changed-files` is not provided.
 - Skips execution if no changed files exist.
@@ -67,12 +67,12 @@ Path: `/.github/actions/base/prettier`
 
 Path: `/.github/actions/base/markdown-check`
 
-### Inputs
+#### Inputs
 
 - `changed-files` (default: `""`): optional pre-resolved changed files list.
 - `package-manager` (default: `"bun"`): `bun`, `pnpm`, or `npm`.
 
-### Behavior
+#### Behavior
 
 - Discovers changed markdown files (`.md`, `.mdx`) if `changed-files` is not provided.
 - Filters/uses markdown-only changed files.
@@ -84,11 +84,11 @@ Path: `/.github/actions/base/markdown-check`
 
 Path: `/.github/actions/base/commit-check`
 
-### Inputs
+#### Inputs
 
 - `package-manager` (default: `"bun"`): `bun`, `pnpm`, or `npm`.
 
-### Behavior
+#### Behavior
 
 - Runs only on `pull_request` events for install/config/check steps.
 - Installs commitlint CLI globally using selected package manager.
@@ -108,14 +108,14 @@ present) and typically assume `base/setup-runtime` has already been called.
 
 Path: `/.github/actions/composed/pr-checks`
 
-### Inputs
+#### Inputs
 
 - `run-prettier` (default: `"true"`): enable prettier check.
 - `run-markdown` (default: `"true"`): enable markdown check.
 - `run-commits` (default: `"true"`): enable commit check.
 - `package-manager` (default: `"bun"`): `bun`, `pnpm`, or `npm`.
 
-### Behavior
+#### Behavior
 
 - Discovers changed files once when needed (prettier/markdown enabled).
 - Runs selected base actions:
