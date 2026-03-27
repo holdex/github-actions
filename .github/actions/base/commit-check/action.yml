@@ -11,6 +11,7 @@ runs:
   using: composite
   steps:
     - name: Install commitlint CLI
+      if: github.event_name == 'pull_request'
       shell: bash
       run: |
         if [ "${{ inputs.package-manager }}" = "pnpm" ]; then
@@ -23,6 +24,7 @@ runs:
 
     - name: Check for commitlint config
       id: commitlint-config
+      if: github.event_name == 'pull_request'
       shell: bash
       run: |
         CONFIG_FILES=".commitlintrc .commitlintrc.json .commitlintrc.yaml .commitlintrc.yml .commitlintrc.js .commitlintrc.cjs .commitlintrc.mjs .commitlintrc.ts .commitlintrc.cts commitlint.config.js commitlint.config.cjs commitlint.config.mjs commitlint.config.ts commitlint.config.cts"
@@ -46,7 +48,7 @@ runs:
         fi
 
     - name: Install dependencies if config exists
-      if: steps.commitlint-config.outputs.has-config == 'true'
+      if: github.event_name == 'pull_request' && steps.commitlint-config.outputs.has-config == 'true'
       shell: bash
       run: |
         if [ "${{ inputs.package-manager }}" = "pnpm" ]; then
@@ -58,7 +60,7 @@ runs:
         fi
 
     - name: Install commitlint globally if no config
-      if: steps.commitlint-config.outputs.has-config == 'false'
+      if: github.event_name == 'pull_request' && steps.commitlint-config.outputs.has-config == 'false'
       shell: bash
       run: |
         if [ "${{ inputs.package-manager }}" = "pnpm" ]; then
@@ -70,7 +72,7 @@ runs:
         fi
 
     - name: Create commitlint config if missing
-      if: steps.commitlint-config.outputs.has-config == 'false'
+      if: github.event_name == 'pull_request' && steps.commitlint-config.outputs.has-config == 'false'
       shell: bash
       run: |
         echo "extends:" > .commitlintrc.yml
