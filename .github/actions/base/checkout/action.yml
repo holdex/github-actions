@@ -1,5 +1,5 @@
 name: Checkout Holdex Github Actions
-description: Checkout Holdex Github Actions repository with provided ref
+description: Checks out holdex/github-actions at a given ref into .holdex-actions
 
 inputs:
   ref:
