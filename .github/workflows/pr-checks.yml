@@ -36,7 +36,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: holdex/github-actions/.github/actions/base/checkout@ea9203431c2eb71fd8f37328cd530a6c494a37e1
+      - uses: holdex/github-actions/.github/actions/base/checkout@4d60fb47db98189d8adab64d61364ca43fb4be20
         with:
           ref: ${{ inputs.ref }}
 
