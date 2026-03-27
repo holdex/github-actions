@@ -15,7 +15,7 @@ inputs:
     required: false
     default: "true"
   package-manager:
-    description: Package manager to use (bun or pnpm)
+    description: Package manager to use (bun, pnpm, or npm)
     required: false
     default: "bun"
 

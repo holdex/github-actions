@@ -3,7 +3,7 @@ description: Validate pull request title with commitlint
 
 inputs:
   package-manager:
-    description: Package manager to use (bun or pnpm)
+    description: Package manager to use (bun, pnpm, or npm)
     required: false
     default: "bun"
 
@@ -15,6 +15,8 @@ runs:
       run: |
         if [ "${{ inputs.package-manager }}" = "pnpm" ]; then
           pnpm add -g @commitlint/cli
+        elif [ "${{ inputs.package-manager }}" = "npm" ]; then
+          npm install -g @commitlint/cli
         else
           bun i -g @commitlint/cli
         fi
@@ -49,6 +51,8 @@ runs:
       run: |
         if [ "${{ inputs.package-manager }}" = "pnpm" ]; then
           pnpm install --frozen-lockfile
+        elif [ "${{ inputs.package-manager }}" = "npm" ]; then
+          npm ci
         else
           bun i --frozen-lockfile
         fi
@@ -59,6 +63,8 @@ runs:
       run: |
         if [ "${{ inputs.package-manager }}" = "pnpm" ]; then
           pnpm add -D @commitlint/config-conventional
+        elif [ "${{ inputs.package-manager }}" = "npm" ]; then
+          npm install --save-dev @commitlint/config-conventional
         else
           bun i -D @commitlint/config-conventional
         fi
