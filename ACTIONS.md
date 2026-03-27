@@ -95,6 +95,10 @@ Path: `/.github/actions/base/commit-check`
 
 ## Composed Actions
 
+Composed actions orchestrate multiple base actions into a single, higher-level
+check. They are intended to run after `base/checkout` (so `.holdex-actions` is
+present) and typically assume `base/setup-runtime` has already been called.
+
 ### `composed/pr-checks`
 
 Path: `/.github/actions/composed/pr-checks`
