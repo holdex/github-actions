@@ -1,29 +1,22 @@
 # GitHub Actions
 
-Shared GitHub Actions workflows for consistent code quality checks across
-repositories.
+Shared checks for Holdex repositories.
 
-## Available Workflows
+## Action Structure
 
-This repository provides reusable workflows for:
+See [ACTIONS.md](ACTIONS.md) for detailed action structure and behavior.
 
-- **Prettier Check** - Validates code formatting with Prettier
-- **Markdown Lint** - Lints Markdown files using rumdl
-- **Conventional Commit Check for PR Title** - Validates PR titles follow
-  conventional commit format
-- **PR Checks** - Combined workflow that runs all checks (or selected ones) with
-  draft PR handling
+## Versioning
+
+- Use a full commit SHA for `uses:` and checkout refs in examples.
+- Replace `<commit-sha>` below with the exact commit you want to consume.
 
 ## Usage
 
-### Option 1: Combined Workflow (Recommended for Simple Setup)
+### Option 1 (Primary): Direct Composition with Checkout + Local Paths
 
-Use the combined `pr-checks.yml` workflow to run all checks at once. This
-workflow automatically handles draft PRs and runs all checks by default.
-
-#### Basic Usage
-
-Create `.github/workflows/pr-checks.yml` in your repository:
+This is the primary pattern. First checkout this repository into
+`.holdex-actions`, then call actions from that checked-out path.
 
 ```yaml
 name: PR Checks
@@ -34,12 +27,70 @@ on:
 
 jobs:
   checks:
-    uses: holdex/github-actions/.github/workflows/pr-checks.yml@main
+    if: github.event.pull_request.draft == false
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: holdex/github-actions/.github/actions/base/checkout@main
+        with:
+          ref: <commit-sha>
+
+      - uses: ./.holdex-actions/.github/actions/base/setup-runtime
+        with:
+          package-manager: pnpm
+
+      - uses: ./.holdex-actions/.github/actions/composed/pr-checks
+        with:
+          run-prettier: true
+          run-markdown: false
+          run-commits: true
+          package-manager: pnpm
+
+      - name: Run project checks
+        run: |
+          pnpm install --frozen-lockfile
+          pnpm lint
+          pnpm check
 ```
 
-#### Selective Checks
+### Option 2: Direct Granular Actions
 
-To run only specific checks, pass input flags:
+Use base actions directly when you need full control in one job.
+
+```yaml
+name: Checks
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize]
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: holdex/github-actions/.github/actions/base/checkout@main
+        with:
+          ref: <commit-sha>
+
+      - uses: ./.holdex-actions/.github/actions/base/setup-runtime
+        with:
+          package-manager: pnpm
+
+      - uses: ./.holdex-actions/.github/actions/base/prettier
+        with:
+          package-manager: pnpm
+
+      - uses: ./.holdex-actions/.github/actions/base/commit-check
+        with:
+          package-manager: pnpm
+```
+
+### Option 3: Reusable Workflows
+
+Use reusable workflows when you prefer a stable job-level interface.
 
 ```yaml
 name: PR Checks
@@ -50,108 +101,26 @@ on:
 
 jobs:
   checks:
-    uses: holdex/github-actions/.github/workflows/pr-checks.yml@main
+    uses: holdex/github-actions/.github/workflows/pr-checks.yml@<commit-sha>
+```
+
+Selective checks:
+
+```yaml
+jobs:
+  checks:
+    uses: holdex/github-actions/.github/workflows/pr-checks.yml@<commit-sha>
     with:
       run-prettier: true
-      run-markdown: false # Skip markdown check
+      run-markdown: false
       run-commits: true
+      package-manager: bun
 ```
 
-### Option 2: Individual Workflows
+## Inputs and Behavior Reference
 
-Use individual workflows for granular control over when each check runs.
+See [ACTIONS.md](ACTIONS.md) for workflow inputs and detailed behavior of each action.
 
-#### Prettier Check
+## Contributing
 
-```yaml
-name: Prettier Check
-
-on:
-  pull_request:
-    types: [opened, reopened, synchronize]
-
-jobs:
-  prettier:
-    uses: holdex/github-actions/.github/workflows/prettier.yml@main
-```
-
-**Requirements:**
-
-- Prettier configuration file (`.prettierrc`, `.prettierrc.json`, etc.) or
-  `prettier` config in `package.json`
-
-#### Markdown Lint
-
-```yaml
-name: Markdown Lint
-
-on:
-  pull_request:
-    types: [opened, reopened, synchronize]
-
-jobs:
-  markdown:
-    uses: holdex/github-actions/.github/workflows/markdown-check.yml@main
-```
-
-#### Conventional Commit Check
-
-```yaml
-name: Commit Check
-
-on:
-  pull_request:
-    types: [opened, reopened, synchronize]
-
-jobs:
-  commits:
-    uses: holdex/github-actions/.github/workflows/commit-check.yml@main
-```
-
-**Requirements:**
-
-- Commitlint configuration file (`.commitlintrc.json`, etc.) or `commitlint`
-  config in `package.json`
-- If no config exists, the workflow will create a default `.commitlintrc.json`
-  file
-
-## Workflow Details
-
-### PR Checks (`pr-checks.yml`)
-
-The combined workflow includes:
-
-- **Draft PR handling** - Automatically skips checks for draft PRs
-- **Selective execution** - Control which checks run via inputs
-- **Default behavior** - Runs all checks if no inputs specified
-
-**Inputs:**
-
-- `run-prettier` (boolean, default: `true`) - Run Prettier check
-- `run-markdown` (boolean, default: `true`) - Run Markdown lint
-- `run-commits` (boolean, default: `true`) - Run commit check
-
-### Prettier Check (`prettier.yml`)
-
-- Validates that a Prettier configuration exists
-- Checks code formatting using Prettier
-- Supports all Prettier-supported file types
-- Uses Bun for package management
-
-### Markdown Lint (`markdown-check.yml`)
-
-- Uses `rumdl` v0.0.185 for fast Markdown linting
-- Checks all Markdown files in the repository
-- Reports issues with GitHub annotations
-
-### Conventional Commit Check (`commit-check.yml`)
-
-- Validates PR titles follow conventional commit format
-- Creates default commitlint config if missing (requires `package.json`)
-- Uses Bun for package management
-
-## Requirements
-
-- Node.js 22+
-- Bun (installed automatically in workflows)
-  - Uses the latest version of Bun
+See [CONTRIBUTING.md](CONTRIBUTING.md) for development setup and testing flow.

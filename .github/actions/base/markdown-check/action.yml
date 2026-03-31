@@ -1,0 +1,73 @@
+name: Markdown Lint
+description: Lint Markdown files using rumdl
+
+inputs:
+  changed-files:
+    description: Optional pre-resolved changed files list
+    required: false
+    default: ""
+  package-manager:
+    description: Package manager to use (bun, pnpm, or npm)
+    required: false
+    default: "bun"
+
+runs:
+  using: composite
+  steps:
+    - name: Get changed markdown files
+      id: changed-markdown-files
+      if: inputs.changed-files == ''
+      uses: tj-actions/changed-files@22103cc46bda19c2b464ffe86db46df6922fd323
+      with:
+        files: |
+          **/*.md
+          **/*.mdx
+
+    - name: Resolve changed markdown files
+      id: resolved-markdown-files
+      shell: bash
+      run: |
+        if [ -z "${{ inputs.changed-files }}" ]; then
+          echo "any-changed=${{ steps.changed-markdown-files.outputs.any_changed }}" >> "$GITHUB_OUTPUT"
+          echo "files=${{ steps.changed-markdown-files.outputs.all_changed_files }}" >> "$GITHUB_OUTPUT"
+          exit 0
+        fi
+
+        markdown_files=()
+        for file in ${{ inputs.changed-files }}; do
+          case "$file" in
+            *.md|*.mdx)
+              markdown_files+=("$file")
+              ;;
+          esac
+        done
+
+        if [ "${#markdown_files[@]}" -eq 0 ]; then
+          echo "any-changed=false" >> "$GITHUB_OUTPUT"
+          echo "files=" >> "$GITHUB_OUTPUT"
+        else
+          echo "any-changed=true" >> "$GITHUB_OUTPUT"
+          echo "files=${markdown_files[*]}" >> "$GITHUB_OUTPUT"
+        fi
+
+    - name: Install rumdl
+      if: steps.resolved-markdown-files.outputs.any-changed == 'true'
+      shell: bash
+      run: |
+        if [ "${{ inputs.package-manager }}" = "pnpm" ]; then
+          pnpm add -g rumdl
+        elif [ "${{ inputs.package-manager }}" = "npm" ]; then
+          npm install -g rumdl
+        else
+          bun i -g rumdl
+        fi
+
+    - name: Skip when no markdown files changed
+      if: steps.resolved-markdown-files.outputs.any-changed != 'true'
+      shell: bash
+      run: echo "No changed Markdown files to lint."
+
+    - name: Lint changed Markdown files
+      if: steps.resolved-markdown-files.outputs.any-changed == 'true'
+      shell: bash
+      run: rumdl check --output-format github --fail-on error ${{ steps.resolved-markdown-files.outputs.files }}

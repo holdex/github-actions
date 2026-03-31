@@ -18,38 +18,37 @@ on:
         required: false
         type: boolean
         default: true
+      package-manager:
+        description: "Package manager to use (bun, pnpm, or npm)"
+        required: false
+        type: string
+        default: bun
+      ref:
+        description: "Ref to checkout from holdex/github-actions"
+        required: false
+        type: string
+        default: main
 
 jobs:
-  check-draft:
+  checks:
+    if: github.event.pull_request == null || github.event.pull_request.draft == false
     runs-on: ubuntu-latest
-    outputs:
-      should-run: ${{ steps.check.outputs.should-run }}
     steps:
-      - id: check
-        run: |
-          if [ "${{ github.event_name }}" != "pull_request" ] || [ "${{ github.event.pull_request.draft }}" != "true" ]; then
-            echo "should-run=true" >> $GITHUB_OUTPUT
-          else
-            echo "should-run=false" >> $GITHUB_OUTPUT
-          fi
+      - uses: actions/checkout@v4
 
-  prettier:
-    needs: check-draft
-    if:
-      needs.check-draft.outputs.should-run == 'true' && inputs.run-prettier !=
-      false
-    uses: ./.github/workflows/prettier.yml
+      - uses: holdex/github-actions/.github/actions/base/checkout@4d60fb47db98189d8adab64d61364ca43fb4be20
+        with:
+          ref: ${{ inputs.ref }}
 
-  markdown:
-    needs: check-draft
-    if:
-      needs.check-draft.outputs.should-run == 'true' && inputs.run-markdown !=
-      false
-    uses: ./.github/workflows/markdown-check.yml
+      - name: Setup runtime
+        uses: ./.holdex-actions/.github/actions/base/setup-runtime
+        with:
+          package-manager: ${{ inputs.package-manager }}
 
-  commits:
-    needs: check-draft
-    if:
-      needs.check-draft.outputs.should-run == 'true' && inputs.run-commits !=
-      false
-    uses: ./.github/workflows/commit-check.yml
+      - name: Run selected PR checks
+        uses: ./.holdex-actions/.github/actions/composed/pr-checks
+        with:
+          run-prettier: ${{ inputs.run-prettier }}
+          run-markdown: ${{ inputs.run-markdown }}
+          run-commits: ${{ inputs.run-commits }}
+          package-manager: ${{ inputs.package-manager }}

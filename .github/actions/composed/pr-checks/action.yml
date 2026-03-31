@@ -1,0 +1,57 @@
+name: PR Checks
+description: Run selected PR checks in a single job
+
+inputs:
+  run-prettier:
+    description: Run Prettier check
+    required: false
+    default: "true"
+  run-markdown:
+    description: Run Markdown check
+    required: false
+    default: "true"
+  run-commits:
+    description: Run Commit check
+    required: false
+    default: "true"
+  package-manager:
+    description: Package manager to use (bun, pnpm, or npm)
+    required: false
+    default: "bun"
+
+runs:
+  using: composite
+  steps:
+    - name: Get changed files
+      id: changed-files
+      if:
+        (github.event_name != 'pull_request' || github.event.pull_request.draft
+        != true) && (inputs.run-prettier != 'false' || inputs.run-markdown !=
+        'false')
+      uses: tj-actions/changed-files@22103cc46bda19c2b464ffe86db46df6922fd323
+
+    - name: Run Prettier check
+      if:
+        (github.event_name != 'pull_request' || github.event.pull_request.draft
+        != true) && inputs.run-prettier != 'false'
+      uses: ./.holdex-actions/.github/actions/base/prettier
+      with:
+        changed-files: ${{ steps.changed-files.outputs.all_changed_files }}
+        package-manager: ${{ inputs.package-manager }}
+
+    - name: Run Markdown check
+      if:
+        (github.event_name != 'pull_request' || github.event.pull_request.draft
+        != true) && inputs.run-markdown != 'false'
+      uses: ./.holdex-actions/.github/actions/base/markdown-check
+      with:
+        changed-files: ${{ steps.changed-files.outputs.all_changed_files }}
+        package-manager: ${{ inputs.package-manager }}
+
+    - name: Run Commit check
+      if:
+        (github.event_name != 'pull_request' || github.event.pull_request.draft
+        != true) && inputs.run-commits != 'false'
+      uses: ./.holdex-actions/.github/actions/base/commit-check
+      with:
+        package-manager: ${{ inputs.package-manager }}

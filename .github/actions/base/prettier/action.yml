@@ -1,0 +1,92 @@
+name: Prettier Check
+description: Validate Prettier configuration and formatting
+
+inputs:
+  changed-files:
+    description: Optional pre-resolved changed files list
+    required: false
+    default: ""
+  package-manager:
+    description: Package manager to use (bun, pnpm, or npm)
+    required: false
+    default: "bun"
+
+runs:
+  using: composite
+  steps:
+    - name: Get changed files
+      id: changed-files
+      if: inputs.changed-files == ''
+      uses: tj-actions/changed-files@22103cc46bda19c2b464ffe86db46df6922fd323
+
+    - name: Resolve changed files
+      id: resolved-files
+      shell: bash
+      run: |
+        if [ -n "${{ inputs.changed-files }}" ]; then
+          echo "any-changed=true" >> "$GITHUB_OUTPUT"
+          echo "files=${{ inputs.changed-files }}" >> "$GITHUB_OUTPUT"
+        else
+          echo "any-changed=${{ steps.changed-files.outputs.any_changed }}" >> "$GITHUB_OUTPUT"
+          echo "files=${{ steps.changed-files.outputs.all_changed_files }}" >> "$GITHUB_OUTPUT"
+        fi
+
+    - name: Install Prettier
+      if: steps.resolved-files.outputs.any-changed == 'true'
+      shell: bash
+      run: |
+        if [ "${{ inputs.package-manager }}" = "pnpm" ]; then
+          pnpm add -g prettier
+        elif [ "${{ inputs.package-manager }}" = "npm" ]; then
+          npm install -g prettier
+        else
+          bun i -g prettier
+        fi
+
+    - name: Check for Prettier config
+      id: prettier-config
+      if: steps.resolved-files.outputs.any-changed == 'true'
+      shell: bash
+      run: |
+        probe_file=".prettier-config-probe.tmp"
+        touch "$probe_file"
+
+        if prettier --find-config-path "$probe_file" >/dev/null 2>&1; then
+          echo "has-config=true" >> "$GITHUB_OUTPUT"
+        else
+          echo "has-config=false" >> "$GITHUB_OUTPUT"
+          echo "::error file=.prettierrc::No Prettier configuration file found."
+          echo "A Prettier config file is required to ensure consistent formatting across all developers."
+          echo "Without a shared config, each developer's local Prettier settings will differ, causing unnecessary formatting changes in commits."
+          echo "Please create a .prettierrc file in your repository root."
+          rm -f "$probe_file"
+          exit 1
+        fi
+
+        rm -f "$probe_file"
+
+    - name: Install dependencies
+      if: steps.resolved-files.outputs.any-changed == 'true'
+      shell: bash
+      run: |
+        if [ -f package.json ]; then
+          if [ "${{ inputs.package-manager }}" = "pnpm" ]; then
+            pnpm install --frozen-lockfile
+          elif [ "${{ inputs.package-manager }}" = "npm" ]; then
+            npm ci
+          else
+            bun i --frozen-lockfile
+          fi
+        else
+          echo "No package.json found, skipping dependency installation."
+        fi
+
+    - name: Skip when no files changed
+      if: steps.resolved-files.outputs.any-changed != 'true'
+      shell: bash
+      run: echo "No changed files to check with Prettier."
+
+    - name: Check formatting
+      if: steps.resolved-files.outputs.any-changed == 'true'
+      shell: bash
+      run: prettier --check --ignore-unknown ${{ steps.resolved-files.outputs.files }}

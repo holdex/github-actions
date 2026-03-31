@@ -7,3 +7,5 @@ on:
 jobs:
   checks:
     uses: ./.github/workflows/pr-checks.yml
+    with:
+      ref: ${{ github.event.pull_request.head.sha }}

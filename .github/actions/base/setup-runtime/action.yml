@@ -1,0 +1,58 @@
+name: Setup Runtime
+description: Setup Bun, pnpm, or npm runtime for checks
+
+inputs:
+  package-manager:
+    description: Package manager to use (bun, pnpm, or npm)
+    required: false
+    default: "bun"
+
+runs:
+  using: composite
+  steps:
+    - name: Validate package manager
+      shell: bash
+      run: |
+        if [ "${{ inputs.package-manager }}" != "bun" ] && [ "${{ inputs.package-manager }}" != "pnpm" ] && [ "${{ inputs.package-manager }}" != "npm" ]; then
+          echo "::error::Invalid package-manager '${{ inputs.package-manager }}'. Supported values: bun, pnpm, npm."
+          exit 1
+        fi
+
+    - name: Setup Bun
+      if: inputs.package-manager == 'bun'
+      uses: oven-sh/setup-bun@v2
+      with:
+        bun-version: latest
+
+    - name: Setup Node.js
+      if: inputs.package-manager == 'pnpm' || inputs.package-manager == 'npm'
+      uses: actions/setup-node@v4
+      with:
+        node-version: 22
+
+    - name: Detect pnpm packageManager
+      if: inputs.package-manager == 'pnpm'
+      id: pnpm-package-manager
+      shell: bash
+      run: |
+        if [ ! -f package.json ]; then
+          echo "has-pnpm-package-manager=false" >> "$GITHUB_OUTPUT"
+          exit 0
+        fi
+
+        PACKAGE_MANAGER="$(node -p "try { require('./package.json').packageManager || '' } catch { '' }")"
+        if [[ "$PACKAGE_MANAGER" == pnpm@* ]]; then
+          echo "has-pnpm-package-manager=true" >> "$GITHUB_OUTPUT"
+        else
+          echo "has-pnpm-package-manager=false" >> "$GITHUB_OUTPUT"
+        fi
+
+    - name: Setup pnpm (packageManager)
+      if: inputs.package-manager == 'pnpm' && steps.pnpm-package-manager.outputs.has-pnpm-package-manager == 'true'
+      uses: pnpm/action-setup@v4
+
+    - name: Setup pnpm (latest)
+      if: inputs.package-manager == 'pnpm' && steps.pnpm-package-manager.outputs.has-pnpm-package-manager != 'true'
+      uses: pnpm/action-setup@v4
+      with:
+        version: latest
