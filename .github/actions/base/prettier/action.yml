@@ -18,6 +18,8 @@ runs:
       id: changed-files
       if: inputs.changed-files == ''
       uses: tj-actions/changed-files@22103cc46bda19c2b464ffe86db46df6922fd323
+      with:
+        files: "${{ env.HOLDEX_WORKING_DIR || '.' }}/**"
 
     - name: Resolve changed files
       id: resolved-files
@@ -29,7 +31,16 @@ runs:
           echo "files=${{ inputs.changed-files }}" >> "$GITHUB_OUTPUT"
         else
           echo "any-changed=${{ steps.changed-files.outputs.any_changed }}" >> "$GITHUB_OUTPUT"
-          echo "files=${{ steps.changed-files.outputs.all_changed_files }}" >> "$GITHUB_OUTPUT"
+          files="${{ steps.changed-files.outputs.all_changed_files }}"
+          dir="${HOLDEX_WORKING_DIR:-.}"
+          if [ "$dir" != "." ]; then
+            relative=""
+            for f in $files; do
+              relative="$relative ${f#"$dir/"}"
+            done
+            files="${relative# }"
+          fi
+          echo "files=$files" >> "$GITHUB_OUTPUT"
         fi
 
     - name: Install Prettier

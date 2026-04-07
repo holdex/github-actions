@@ -43,6 +43,27 @@ runs:
         != true) && (inputs.run-prettier != 'false' || inputs.run-markdown !=
         'false')
       uses: tj-actions/changed-files@22103cc46bda19c2b464ffe86db46df6922fd323
+      with:
+        files: "${{ env.HOLDEX_WORKING_DIR || '.' }}/**"
+
+    - name: Strip working directory prefix from changed files
+      id: relative-files
+      if:
+        (github.event_name != 'pull_request' || github.event.pull_request.draft
+        != true) && (inputs.run-prettier != 'false' || inputs.run-markdown !=
+        'false')
+      shell: bash
+      run: |
+        files="${{ steps.changed-files.outputs.all_changed_files }}"
+        dir="${HOLDEX_WORKING_DIR:-.}"
+        if [ "$dir" != "." ]; then
+          relative=""
+          for f in $files; do
+            relative="$relative ${f#"$dir/"}"
+          done
+          files="${relative# }"
+        fi
+        echo "files=$files" >> "$GITHUB_OUTPUT"
 
     - name: Run Prettier check
       if:
@@ -50,7 +71,7 @@ runs:
         != true) && inputs.run-prettier != 'false'
       uses: ./.holdex-actions/.github/actions/base/prettier
       with:
-        changed-files: ${{ steps.changed-files.outputs.all_changed_files }}
+        changed-files: ${{ steps.relative-files.outputs.files }}
         package-manager: ${{ inputs.package-manager }}
 
     - name: Run Markdown check
@@ -59,7 +80,7 @@ runs:
         != true) && inputs.run-markdown != 'false'
       uses: ./.holdex-actions/.github/actions/base/markdown-check
       with:
-        changed-files: ${{ steps.changed-files.outputs.all_changed_files }}
+        changed-files: ${{ steps.relative-files.outputs.files }}
         package-manager: ${{ inputs.package-manager }}
 
     - name: Run Commit check
