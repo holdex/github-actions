@@ -30,6 +30,7 @@ runs:
       shell: bash
       run: |
         dir="${HOLDEX_WORKING_DIR:-${{ inputs.working-directory }}}"
+        dir="${dir#./}"
         if [ ! -d "$dir" ]; then
           echo "Error: working-directory '$dir' does not exist." >&2
           exit 1
