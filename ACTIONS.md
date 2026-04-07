@@ -43,6 +43,7 @@ Path: `/.github/actions/base/setup-runtime`
 - For `bun`: installs Bun runtime.
 - For `pnpm`/`npm`: installs Node.js.
 - For `pnpm`: installs pnpm using `package.json#packageManager` when present, otherwise falls back to `latest`.
+- Respects `HOLDEX_WORKING_DIR` env var for `package.json` detection when set.
 
 ### `base/prettier`
 
@@ -62,6 +63,7 @@ Path: `/.github/actions/base/prettier`
 - Runs dependency install in repo context when `package.json` exists:
   - `bun i --frozen-lockfile`, `pnpm install --frozen-lockfile`, or `npm ci`.
 - Runs `prettier --check --ignore-unknown` on changed files.
+- Respects `HOLDEX_WORKING_DIR` env var: all steps run in that directory when set.
 
 ### `base/markdown-check`
 
@@ -79,6 +81,7 @@ Path: `/.github/actions/base/markdown-check`
 - Skips execution if no markdown files changed.
 - Installs `rumdl` globally using selected package manager.
 - Runs `rumdl check --output-format github --fail-on error` on changed markdown files.
+- Respects `HOLDEX_WORKING_DIR` env var: all steps run in that directory when set.
 
 ### `base/commit-check`
 
@@ -97,6 +100,7 @@ Path: `/.github/actions/base/commit-check`
   - `bun i --frozen-lockfile`, `pnpm install --frozen-lockfile`, or `npm ci`.
 - If config does not exist, installs `@commitlint/config-conventional` and creates fallback `.commitlintrc.yml`.
 - Validates PR title via `commitlint`.
+- Respects `HOLDEX_WORKING_DIR` env var: all steps run in that directory when set.
 
 ## Composed Actions
 
@@ -114,6 +118,7 @@ Path: `/.github/actions/composed/pr-checks`
 - `run-markdown` (default: `"true"`): enable markdown check.
 - `run-commits` (default: `"true"`): enable commit check.
 - `package-manager` (default: `"bun"`): `bun`, `pnpm`, or `npm`.
+- `working-directory` (default: `"."`): working directory to run all checks in.
 
 #### Behavior
 
@@ -123,3 +128,29 @@ Path: `/.github/actions/composed/pr-checks`
   - `base/markdown-check`
   - `base/commit-check`
 - Assumes `base/setup-runtime` has already been called by the client.
+- Sets `HOLDEX_WORKING_DIR` env var from `working-directory` input (falls back to existing env var if already set by the calling workflow).
+
+## Working Directory
+
+All base actions and the `composed/pr-checks` action support running in a subdirectory via the `HOLDEX_WORKING_DIR` environment variable. This is useful for monorepos where checks should be scoped to a specific package.
+
+The env var is set automatically when using the `pr-checks.yml` reusable workflow with the `working-directory` input, or when using `composed/pr-checks` directly with the `working-directory` input. Base actions read it implicitly — they require no additional inputs.
+
+### Usage via reusable workflow
+
+```yaml
+jobs:
+  checks:
+    uses: holdex/github-actions/.github/workflows/pr-checks.yml@main
+    with:
+      working-directory: ./packages/my-package
+```
+
+### Usage via composed action
+
+```yaml
+- name: Run PR checks
+  uses: ./.holdex-actions/.github/actions/composed/pr-checks
+  with:
+    working-directory: ./packages/my-package
+```

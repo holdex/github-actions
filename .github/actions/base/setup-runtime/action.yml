@@ -34,6 +34,7 @@ runs:
       if: inputs.package-manager == 'pnpm'
       id: pnpm-package-manager
       shell: bash
+      working-directory: ${{ env.HOLDEX_WORKING_DIR || '.' }}
       run: |
         if [ ! -f package.json ]; then
           echo "has-pnpm-package-manager=false" >> "$GITHUB_OUTPUT"

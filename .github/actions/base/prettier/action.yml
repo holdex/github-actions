@@ -22,6 +22,7 @@ runs:
     - name: Resolve changed files
       id: resolved-files
       shell: bash
+      working-directory: ${{ env.HOLDEX_WORKING_DIR || '.' }}
       run: |
         if [ -n "${{ inputs.changed-files }}" ]; then
           echo "any-changed=true" >> "$GITHUB_OUTPUT"
@@ -34,6 +35,7 @@ runs:
     - name: Install Prettier
       if: steps.resolved-files.outputs.any-changed == 'true'
       shell: bash
+      working-directory: ${{ env.HOLDEX_WORKING_DIR || '.' }}
       run: |
         if [ "${{ inputs.package-manager }}" = "pnpm" ]; then
           pnpm add -g prettier
@@ -47,6 +49,7 @@ runs:
       id: prettier-config
       if: steps.resolved-files.outputs.any-changed == 'true'
       shell: bash
+      working-directory: ${{ env.HOLDEX_WORKING_DIR || '.' }}
       run: |
         probe_file=".prettier-config-probe.tmp"
         touch "$probe_file"
@@ -68,6 +71,7 @@ runs:
     - name: Install dependencies
       if: steps.resolved-files.outputs.any-changed == 'true'
       shell: bash
+      working-directory: ${{ env.HOLDEX_WORKING_DIR || '.' }}
       run: |
         if [ -f package.json ]; then
           if [ "${{ inputs.package-manager }}" = "pnpm" ]; then
@@ -84,9 +88,11 @@ runs:
     - name: Skip when no files changed
       if: steps.resolved-files.outputs.any-changed != 'true'
       shell: bash
+      working-directory: ${{ env.HOLDEX_WORKING_DIR || '.' }}
       run: echo "No changed files to check with Prettier."
 
     - name: Check formatting
       if: steps.resolved-files.outputs.any-changed == 'true'
       shell: bash
+      working-directory: ${{ env.HOLDEX_WORKING_DIR || '.' }}
       run: prettier --check --ignore-unknown ${{ steps.resolved-files.outputs.files }}
