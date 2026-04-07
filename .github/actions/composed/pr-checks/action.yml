@@ -29,7 +29,12 @@ runs:
     - name: Set working directory
       shell: bash
       run: |
-        echo "HOLDEX_WORKING_DIR=${{ env.HOLDEX_WORKING_DIR || inputs.working-directory }}" >> $GITHUB_ENV
+        dir="${HOLDEX_WORKING_DIR:-${{ inputs.working-directory }}}"
+        if [ ! -d "$dir" ]; then
+          echo "Error: working-directory '$dir' does not exist." >&2
+          exit 1
+        fi
+        echo "HOLDEX_WORKING_DIR=$dir" >> "$GITHUB_ENV"
 
     - name: Get changed files
       id: changed-files

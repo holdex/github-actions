@@ -128,13 +128,20 @@ Path: `/.github/actions/composed/pr-checks`
   - `base/markdown-check`
   - `base/commit-check`
 - Assumes `base/setup-runtime` has already been called by the client.
-- Sets `HOLDEX_WORKING_DIR` env var from `working-directory` input (falls back to existing env var if already set by the calling workflow).
+- Sets `HOLDEX_WORKING_DIR` env var from `working-directory` input (falls back
+  to existing env var if already set by the calling workflow).
 
 ## Working Directory
 
-All base actions and the `composed/pr-checks` action support running in a subdirectory via the `HOLDEX_WORKING_DIR` environment variable. This is useful for monorepos where checks should be scoped to a specific package.
+All base actions and the `composed/pr-checks` action support running in a
+subdirectory via the `HOLDEX_WORKING_DIR` environment variable.
+This is useful for monorepos where checks should be scoped to a specific
+package.
 
-The env var is set automatically when using the `pr-checks.yml` reusable workflow with the `working-directory` input, or when using `composed/pr-checks` directly with the `working-directory` input. Base actions read it implicitly — they require no additional inputs.
+The env var is set automatically when using the `pr-checks.yml` reusable
+workflow with the `working-directory` input, or when using
+`composed/pr-checks` directly with the `working-directory` input.
+Base actions read it implicitly — they require no additional inputs.
 
 ### Usage via reusable workflow
 
