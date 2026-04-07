@@ -18,10 +18,24 @@ inputs:
     description: Package manager to use (bun, pnpm, or npm)
     required: false
     default: "bun"
+  working-directory:
+    description: Working directory to run checks in
+    required: false
+    default: "."
 
 runs:
   using: composite
   steps:
+    - name: Set working directory
+      shell: bash
+      run: |
+        dir="${HOLDEX_WORKING_DIR:-${{ inputs.working-directory }}}"
+        if [ ! -d "$dir" ]; then
+          echo "Error: working-directory '$dir' does not exist." >&2
+          exit 1
+        fi
+        echo "HOLDEX_WORKING_DIR=$dir" >> "$GITHUB_ENV"
+
     - name: Get changed files
       id: changed-files
       if:

@@ -28,6 +28,11 @@ on:
         required: false
         type: string
         default: main
+      working-directory:
+        description: "Working directory to run checks in"
+        required: false
+        type: string
+        default: "."
 
 jobs:
   checks:
@@ -39,6 +44,10 @@ jobs:
       - uses: holdex/github-actions/.github/actions/base/checkout@main
         with:
           ref: ${{ inputs.ref }}
+
+      - name: Set working directory
+        shell: bash
+        run: echo "HOLDEX_WORKING_DIR=${{ inputs.working-directory }}" >> $GITHUB_ENV
 
       - name: Setup runtime
         uses: ./.holdex-actions/.github/actions/base/setup-runtime
@@ -52,3 +61,4 @@ jobs:
           run-markdown: ${{ inputs.run-markdown }}
           run-commits: ${{ inputs.run-commits }}
           package-manager: ${{ inputs.package-manager }}
+          working-directory: ${{ inputs.working-directory }}

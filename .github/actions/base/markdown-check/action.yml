@@ -26,6 +26,7 @@ runs:
     - name: Resolve changed markdown files
       id: resolved-markdown-files
       shell: bash
+      working-directory: ${{ env.HOLDEX_WORKING_DIR || '.' }}
       run: |
         if [ -z "${{ inputs.changed-files }}" ]; then
           echo "any-changed=${{ steps.changed-markdown-files.outputs.any_changed }}" >> "$GITHUB_OUTPUT"
@@ -53,6 +54,7 @@ runs:
     - name: Install rumdl
       if: steps.resolved-markdown-files.outputs.any-changed == 'true'
       shell: bash
+      working-directory: ${{ env.HOLDEX_WORKING_DIR || '.' }}
       run: |
         if [ "${{ inputs.package-manager }}" = "pnpm" ]; then
           pnpm add -g rumdl
@@ -65,9 +67,11 @@ runs:
     - name: Skip when no markdown files changed
       if: steps.resolved-markdown-files.outputs.any-changed != 'true'
       shell: bash
+      working-directory: ${{ env.HOLDEX_WORKING_DIR || '.' }}
       run: echo "No changed Markdown files to lint."
 
     - name: Lint changed Markdown files
       if: steps.resolved-markdown-files.outputs.any-changed == 'true'
       shell: bash
+      working-directory: ${{ env.HOLDEX_WORKING_DIR || '.' }}
       run: rumdl check --output-format github --fail-on error ${{ steps.resolved-markdown-files.outputs.files }}

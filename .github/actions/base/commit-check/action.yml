@@ -13,6 +13,7 @@ runs:
     - name: Install commitlint CLI
       if: github.event_name == 'pull_request'
       shell: bash
+      working-directory: ${{ env.HOLDEX_WORKING_DIR || '.' }}
       run: |
         if [ "${{ inputs.package-manager }}" = "pnpm" ]; then
           pnpm add -g @commitlint/cli
@@ -26,6 +27,7 @@ runs:
       id: commitlint-config
       if: github.event_name == 'pull_request'
       shell: bash
+      working-directory: ${{ env.HOLDEX_WORKING_DIR || '.' }}
       run: |
         CONFIG_FILES=".commitlintrc .commitlintrc.json .commitlintrc.yaml .commitlintrc.yml .commitlintrc.js .commitlintrc.cjs .commitlintrc.mjs .commitlintrc.ts .commitlintrc.cts commitlint.config.js commitlint.config.cjs commitlint.config.mjs commitlint.config.ts commitlint.config.cts"
         HAS_CONFIG=false
@@ -50,6 +52,7 @@ runs:
     - name: Install dependencies if config exists
       if: github.event_name == 'pull_request' && steps.commitlint-config.outputs.has-config == 'true'
       shell: bash
+      working-directory: ${{ env.HOLDEX_WORKING_DIR || '.' }}
       run: |
         if [ "${{ inputs.package-manager }}" = "pnpm" ]; then
           pnpm install --frozen-lockfile
@@ -62,6 +65,7 @@ runs:
     - name: Install commitlint globally if no config
       if: github.event_name == 'pull_request' && steps.commitlint-config.outputs.has-config == 'false'
       shell: bash
+      working-directory: ${{ env.HOLDEX_WORKING_DIR || '.' }}
       run: |
         if [ "${{ inputs.package-manager }}" = "pnpm" ]; then
           pnpm add -D @commitlint/config-conventional
@@ -74,6 +78,7 @@ runs:
     - name: Create commitlint config if missing
       if: github.event_name == 'pull_request' && steps.commitlint-config.outputs.has-config == 'false'
       shell: bash
+      working-directory: ${{ env.HOLDEX_WORKING_DIR || '.' }}
       run: |
         echo "extends:" > .commitlintrc.yml
         echo "  - '@commitlint/config-conventional'" >> .commitlintrc.yml
@@ -81,6 +86,7 @@ runs:
     - name: Check PR title
       if: github.event_name == 'pull_request'
       shell: bash
+      working-directory: ${{ env.HOLDEX_WORKING_DIR || '.' }}
       env:
         PR_TITLE: ${{ github.event.pull_request.title }}
       run: |
