@@ -46,6 +46,7 @@ jobs:
           run-markdown: false
           run-commits: true
           package-manager: pnpm
+          working-directory: ./packages/my-package # optional, defaults to "."
 
       - name: Run project checks
         run: |
@@ -115,6 +116,16 @@ jobs:
       run-markdown: false
       run-commits: true
       package-manager: bun
+```
+
+Scoped to a subdirectory (e.g. monorepo):
+
+```yaml
+jobs:
+  checks:
+    uses: holdex/github-actions/.github/workflows/pr-checks.yml@<commit-sha>
+    with:
+      working-directory: ./packages/my-package
 ```
 
 ## Inputs and Behavior Reference
