@@ -62,27 +62,6 @@ runs:
           bun i --frozen-lockfile
         fi
 
-    - name: Install commitlint globally if no config
-      if: github.event_name == 'pull_request' && steps.commitlint-config.outputs.has-config == 'false'
-      shell: bash
-      working-directory: ${{ env.HOLDEX_WORKING_DIR || '.' }}
-      run: |
-        if [ "${{ inputs.package-manager }}" = "pnpm" ]; then
-          pnpm add -D @commitlint/config-conventional
-        elif [ "${{ inputs.package-manager }}" = "npm" ]; then
-          npm install --save-dev @commitlint/config-conventional
-        else
-          bun i -D @commitlint/config-conventional
-        fi
-
-    - name: Create commitlint config if missing
-      if: github.event_name == 'pull_request' && steps.commitlint-config.outputs.has-config == 'false'
-      shell: bash
-      working-directory: ${{ env.HOLDEX_WORKING_DIR || '.' }}
-      run: |
-        echo "extends:" > .commitlintrc.yml
-        echo "  - '@commitlint/config-conventional'" >> .commitlintrc.yml
-
     - name: Check PR title
       if: github.event_name == 'pull_request'
       shell: bash
@@ -90,4 +69,8 @@ runs:
       env:
         PR_TITLE: ${{ github.event.pull_request.title }}
       run: |
-        echo "$PR_TITLE" | commitlint
+        if [ "${{ steps.commitlint-config.outputs.has-config }}" = "true" ]; then
+          echo "$PR_TITLE" | commitlint
+        else
+          echo "$PR_TITLE" | commitlint --default-config
+        fi
