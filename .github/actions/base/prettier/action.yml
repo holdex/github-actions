@@ -108,9 +108,9 @@ runs:
       working-directory: ${{ env.HOLDEX_WORKING_DIR || '.' }}
       run: |
         if [ "${{ inputs.package-manager }}" = "pnpm" ]; then
-          pnpm run prettier --check --ignore-unknown ${{ steps.resolved-files.outputs.files }}
+          pnpm exec prettier --check --ignore-unknown ${{ steps.resolved-files.outputs.files }}
         elif [ "${{ inputs.package-manager }}" = "npm" ]; then
-          npm run prettier --check --ignore-unknown ${{ steps.resolved-files.outputs.files }}
+          npx prettier --check --ignore-unknown ${{ steps.resolved-files.outputs.files }}
         else
-          bun run prettier --check --ignore-unknown ${{ steps.resolved-files.outputs.files }}
+          bunx prettier --check --ignore-unknown ${{ steps.resolved-files.outputs.files }}
         fi
