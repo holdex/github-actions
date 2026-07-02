@@ -99,7 +99,7 @@ Path: `/.github/actions/base/commit-check`
 - Detects commitlint configuration from standard config files or `package.json`.
 - If config exists, installs dependencies in repo context:
   - `bun i --frozen-lockfile`, `pnpm install --frozen-lockfile`, or `npm ci`.
-- If config does not exist, installs `@commitlint/config-conventional` and creates fallback `.commitlintrc.yml`.
+- If config does not exist, validates using `commitlint --default-config`.
 - Validates PR title via `commitlint`.
 - Respects `HOLDEX_WORKING_DIR` env var: all steps run in that directory when set.
 
