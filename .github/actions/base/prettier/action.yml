@@ -49,11 +49,11 @@ runs:
       working-directory: ${{ env.HOLDEX_WORKING_DIR || '.' }}
       run: |
         if [ "${{ inputs.package-manager }}" = "pnpm" ]; then
-          pnpm add -g prettier
+          pnpm add prettier -D
         elif [ "${{ inputs.package-manager }}" = "npm" ]; then
-          npm install -g prettier
+          npm i prettier -D
         else
-          bun i -g prettier
+          bun i prettier -D
         fi
 
     - name: Check for Prettier config
