@@ -58,10 +58,11 @@ Path: `/.github/actions/base/prettier`
 
 - Discovers changed files itself if `changed-files` is not provided.
 - Skips execution if no changed files exist.
-- Installs Prettier globally using selected package manager.
-- Verifies a resolvable Prettier config exists.
 - Runs dependency install in repo context when `package.json` exists:
   - `bun i --frozen-lockfile`, `pnpm install --frozen-lockfile`, or `npm ci`.
+- Uses project-local Prettier (`./node_modules/.bin/prettier`) when available after dependency install.
+- Installs Prettier globally as a fallback only when no local binary is found.
+- Verifies a resolvable Prettier config exists.
 - Runs `prettier --check --ignore-unknown` on changed files.
 - Respects `HOLDEX_WORKING_DIR` env var: all steps run in that directory when set.
 
