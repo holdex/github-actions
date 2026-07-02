@@ -56,29 +56,6 @@ runs:
           bun i -g prettier
         fi
 
-    - name: Check for Prettier config
-      id: prettier-config
-      if: steps.resolved-files.outputs.any-changed == 'true'
-      shell: bash
-      working-directory: ${{ env.HOLDEX_WORKING_DIR || '.' }}
-      run: |
-        probe_file=".prettier-config-probe.tmp"
-        touch "$probe_file"
-
-        if prettier --find-config-path "$probe_file" >/dev/null 2>&1; then
-          echo "has-config=true" >> "$GITHUB_OUTPUT"
-        else
-          echo "has-config=false" >> "$GITHUB_OUTPUT"
-          echo "::error file=.prettierrc::No Prettier configuration file found."
-          echo "A Prettier config file is required to ensure consistent formatting across all developers."
-          echo "Without a shared config, each developer's local Prettier settings will differ, causing unnecessary formatting changes in commits."
-          echo "Please create a .prettierrc file in your repository root."
-          rm -f "$probe_file"
-          exit 1
-        fi
-
-        rm -f "$probe_file"
-
     - name: Install dependencies
       if: steps.resolved-files.outputs.any-changed == 'true'
       shell: bash
@@ -96,6 +73,40 @@ runs:
           echo "No package.json found, skipping dependency installation."
         fi
 
+    - name: Check for Prettier config
+      id: prettier-config
+      if: steps.resolved-files.outputs.any-changed == 'true'
+      shell: bash
+      working-directory: ${{ env.HOLDEX_WORKING_DIR || '.' }}
+      run: |
+        run_prettier() {
+          if [ -x "./node_modules/.bin/prettier" ]; then
+            ./node_modules/.bin/prettier "$@"
+          elif command -v prettier >/dev/null 2>&1; then
+            prettier "$@"
+          else
+            echo "::error::Prettier not found locally or globally." >&2
+            exit 1
+          fi
+        }
+
+        probe_file=".prettier-config-probe.tmp"
+        touch "$probe_file"
+
+        if run_prettier --find-config-path "$probe_file" >/dev/null 2>&1; then
+          echo "has-config=true" >> "$GITHUB_OUTPUT"
+        else
+          echo "has-config=false" >> "$GITHUB_OUTPUT"
+          echo "::error file=.prettierrc::No Prettier configuration file found."
+          echo "A Prettier config file is required to ensure consistent formatting across all developers."
+          echo "Without a shared config, each developer's local Prettier settings will differ, causing unnecessary formatting changes in commits."
+          echo "Please create a .prettierrc file in your repository root."
+          rm -f "$probe_file"
+          exit 1
+        fi
+
+        rm -f "$probe_file"
+
     - name: Skip when no files changed
       if: steps.resolved-files.outputs.any-changed != 'true'
       shell: bash
@@ -107,10 +118,15 @@ runs:
       shell: bash
       working-directory: ${{ env.HOLDEX_WORKING_DIR || '.' }}
       run: |
-        if [ "${{ inputs.package-manager }}" = "pnpm" ]; then
-          pnpm exec prettier --check --ignore-unknown ${{ steps.resolved-files.outputs.files }}
-        elif [ "${{ inputs.package-manager }}" = "npm" ]; then
-          npx prettier --check --ignore-unknown ${{ steps.resolved-files.outputs.files }}
-        else
-          bunx prettier --check --ignore-unknown ${{ steps.resolved-files.outputs.files }}
-        fi
+        run_prettier() {
+          if [ -x "./node_modules/.bin/prettier" ]; then
+            ./node_modules/.bin/prettier "$@"
+          elif command -v prettier >/dev/null 2>&1; then
+            prettier "$@"
+          else
+            echo "::error::Prettier not found locally or globally." >&2
+            exit 1
+          fi
+        }
+
+        run_prettier --check --ignore-unknown ${{ steps.resolved-files.outputs.files }}
