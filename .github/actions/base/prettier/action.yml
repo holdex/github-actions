@@ -43,19 +43,6 @@ runs:
           echo "files=$files" >> "$GITHUB_OUTPUT"
         fi
 
-    - name: Install Prettier
-      if: steps.resolved-files.outputs.any-changed == 'true'
-      shell: bash
-      working-directory: ${{ env.HOLDEX_WORKING_DIR || '.' }}
-      run: |
-        if [ "${{ inputs.package-manager }}" = "pnpm" ]; then
-          pnpm add -g prettier
-        elif [ "${{ inputs.package-manager }}" = "npm" ]; then
-          npm install -g prettier
-        else
-          bun i -g prettier
-        fi
-
     - name: Install dependencies
       if: steps.resolved-files.outputs.any-changed == 'true'
       shell: bash
@@ -71,6 +58,24 @@ runs:
           fi
         else
           echo "No package.json found, skipping dependency installation."
+        fi
+
+    - name: Install Prettier (fallback)
+      if: steps.resolved-files.outputs.any-changed == 'true'
+      shell: bash
+      working-directory: ${{ env.HOLDEX_WORKING_DIR || '.' }}
+      run: |
+        if [ -x "./node_modules/.bin/prettier" ]; then
+          echo "Using project-local Prettier."
+          exit 0
+        fi
+
+        if [ "${{ inputs.package-manager }}" = "pnpm" ]; then
+          pnpm add -g prettier
+        elif [ "${{ inputs.package-manager }}" = "npm" ]; then
+          npm install -g prettier
+        else
+          bun i -g prettier
         fi
 
     - name: Check for Prettier config
