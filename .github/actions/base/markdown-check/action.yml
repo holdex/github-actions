@@ -60,8 +60,33 @@ runs:
           echo "files=${markdown_files[*]}" >> "$GITHUB_OUTPUT"
         fi
 
-    - name: Install rumdl
+    - name: Detect rumdl in package.json
+      id: rumdl-deps
       if: steps.resolved-markdown-files.outputs.any-changed == 'true'
+      shell: bash
+      working-directory: ${{ env.HOLDEX_WORKING_DIR || '.' }}
+      run: |
+        if [ -f package.json ] && grep -q '"rumdl"' package.json; then
+          echo "has-rumdl=true" >> "$GITHUB_OUTPUT"
+        else
+          echo "has-rumdl=false" >> "$GITHUB_OUTPUT"
+        fi
+
+    - name: Install dependencies
+      if: steps.resolved-markdown-files.outputs.any-changed == 'true' && steps.rumdl-deps.outputs.has-rumdl == 'true'
+      shell: bash
+      working-directory: ${{ env.HOLDEX_WORKING_DIR || '.' }}
+      run: |
+        if [ "${{ inputs.package-manager }}" = "pnpm" ]; then
+          pnpm install --frozen-lockfile
+        elif [ "${{ inputs.package-manager }}" = "npm" ]; then
+          npm ci
+        else
+          bun i --frozen-lockfile
+        fi
+
+    - name: Install rumdl (fallback)
+      if: steps.resolved-markdown-files.outputs.any-changed == 'true' && steps.rumdl-deps.outputs.has-rumdl != 'true'
       shell: bash
       working-directory: ${{ env.HOLDEX_WORKING_DIR || '.' }}
       run: |
@@ -83,4 +108,16 @@ runs:
       if: steps.resolved-markdown-files.outputs.any-changed == 'true'
       shell: bash
       working-directory: ${{ env.HOLDEX_WORKING_DIR || '.' }}
-      run: rumdl check --output-format github --fail-on error ${{ steps.resolved-markdown-files.outputs.files }}
+      run: |
+        run_rumdl() {
+          if [ -x "./node_modules/.bin/rumdl" ]; then
+            ./node_modules/.bin/rumdl "$@"
+          elif command -v rumdl >/dev/null 2>&1; then
+            rumdl "$@"
+          else
+            echo "::error::rumdl not found locally or globally." >&2
+            exit 1
+          fi
+        }
+
+        run_rumdl check --output-format github --fail-on error ${{ steps.resolved-markdown-files.outputs.files }}
