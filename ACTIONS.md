@@ -80,7 +80,9 @@ Path: `/.github/actions/base/markdown-check`
 - Discovers changed markdown files (`.md`, `.mdx`) if `changed-files` is not provided.
 - Filters/uses markdown-only changed files.
 - Skips execution if no markdown files changed.
-- Installs `rumdl` globally using selected package manager.
+- If `rumdl` is declared in `package.json`, installs project dependencies with frozen lockfile.
+- Otherwise installs `rumdl` globally using selected package manager.
+- Uses project-local `rumdl` (`./node_modules/.bin/rumdl`) when available, otherwise global.
 - Runs `rumdl check --output-format github --fail-on error` on changed markdown files.
 - Respects `HOLDEX_WORKING_DIR` env var: all steps run in that directory when set.
 
