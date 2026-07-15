@@ -61,7 +61,7 @@ Path: `/.github/actions/base/prettier`
 - Runs dependency install in repo context when `package.json` exists:
   - `bun i --frozen-lockfile`, `pnpm install --frozen-lockfile`, or `npm ci`.
 - Uses project-local Prettier (`./node_modules/.bin/prettier`) when available after dependency install.
-- Installs Prettier globally as a fallback only when no local binary is found.
+- Falls back to `pnpm dlx` / `npx` / `bunx prettier` when no local binary is found.
 - Verifies a resolvable Prettier config exists.
 - Runs `prettier --check --ignore-unknown` on changed files.
 - Respects `HOLDEX_WORKING_DIR` env var: all steps run in that directory when set.
@@ -81,8 +81,8 @@ Path: `/.github/actions/base/markdown-check`
 - Filters/uses markdown-only changed files.
 - Skips execution if no markdown files changed.
 - If `rumdl` is declared in `package.json`, installs project dependencies with frozen lockfile.
-- Otherwise installs `rumdl` globally using selected package manager.
-- Uses project-local `rumdl` (`./node_modules/.bin/rumdl`) when available, otherwise global.
+- Uses project-local `rumdl` (`./node_modules/.bin/rumdl`) when available.
+- Otherwise falls back to `pnpm dlx` / `npx` / `bunx rumdl`.
 - Runs `rumdl check --output-format github --fail-on error` on changed markdown files.
 - Respects `HOLDEX_WORKING_DIR` env var: all steps run in that directory when set.
 
@@ -97,12 +97,12 @@ Path: `/.github/actions/base/commit-check`
 #### Behavior
 
 - Runs only on `pull_request` events for install/config/check steps.
-- Installs commitlint CLI globally using selected package manager.
 - Detects commitlint configuration from standard config files or `package.json`.
 - If config exists, installs dependencies in repo context:
   - `bun i --frozen-lockfile`, `pnpm install --frozen-lockfile`, or `npm ci`.
-- If config does not exist, validates using `commitlint --default-config`.
-- Validates PR title via `commitlint`.
+- Runs `@commitlint/cli` via `pnpm dlx` / `npx` / `bunx` (no global install).
+- If config does not exist, validates using `--default-config`.
+- Validates PR title via commitlint.
 - Respects `HOLDEX_WORKING_DIR` env var: all steps run in that directory when set.
 
 ## Composed Actions

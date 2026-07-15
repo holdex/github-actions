@@ -85,19 +85,6 @@ runs:
           bun i --frozen-lockfile
         fi
 
-    - name: Install rumdl (fallback)
-      if: steps.resolved-markdown-files.outputs.any-changed == 'true' && steps.rumdl-deps.outputs.has-rumdl != 'true'
-      shell: bash
-      working-directory: ${{ env.HOLDEX_WORKING_DIR || '.' }}
-      run: |
-        if [ "${{ inputs.package-manager }}" = "pnpm" ]; then
-          pnpm add -g rumdl
-        elif [ "${{ inputs.package-manager }}" = "npm" ]; then
-          npm install -g rumdl
-        else
-          bun i -g rumdl
-        fi
-
     - name: Skip when no markdown files changed
       if: steps.resolved-markdown-files.outputs.any-changed != 'true'
       shell: bash
@@ -112,11 +99,12 @@ runs:
         run_rumdl() {
           if [ -x "./node_modules/.bin/rumdl" ]; then
             ./node_modules/.bin/rumdl "$@"
-          elif command -v rumdl >/dev/null 2>&1; then
-            rumdl "$@"
+          elif [ "${{ inputs.package-manager }}" = "pnpm" ]; then
+            pnpm dlx rumdl "$@"
+          elif [ "${{ inputs.package-manager }}" = "npm" ]; then
+            npx --yes rumdl "$@"
           else
-            echo "::error::rumdl not found locally or globally." >&2
-            exit 1
+            bunx rumdl "$@"
           fi
         }
 
