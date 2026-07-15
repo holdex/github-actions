@@ -60,24 +60,6 @@ runs:
           echo "No package.json found, skipping dependency installation."
         fi
 
-    - name: Install Prettier (fallback)
-      if: steps.resolved-files.outputs.any-changed == 'true'
-      shell: bash
-      working-directory: ${{ env.HOLDEX_WORKING_DIR || '.' }}
-      run: |
-        if [ -x "./node_modules/.bin/prettier" ]; then
-          echo "Using project-local Prettier."
-          exit 0
-        fi
-
-        if [ "${{ inputs.package-manager }}" = "pnpm" ]; then
-          pnpm add -g prettier
-        elif [ "${{ inputs.package-manager }}" = "npm" ]; then
-          npm install -g prettier
-        else
-          bun i -g prettier
-        fi
-
     - name: Check for Prettier config
       id: prettier-config
       if: steps.resolved-files.outputs.any-changed == 'true'
@@ -87,11 +69,12 @@ runs:
         run_prettier() {
           if [ -x "./node_modules/.bin/prettier" ]; then
             ./node_modules/.bin/prettier "$@"
-          elif command -v prettier >/dev/null 2>&1; then
-            prettier "$@"
+          elif [ "${{ inputs.package-manager }}" = "pnpm" ]; then
+            pnpm dlx prettier "$@"
+          elif [ "${{ inputs.package-manager }}" = "npm" ]; then
+            npx --yes prettier "$@"
           else
-            echo "::error::Prettier not found locally or globally." >&2
-            exit 1
+            bunx prettier "$@"
           fi
         }
 
@@ -126,11 +109,12 @@ runs:
         run_prettier() {
           if [ -x "./node_modules/.bin/prettier" ]; then
             ./node_modules/.bin/prettier "$@"
-          elif command -v prettier >/dev/null 2>&1; then
-            prettier "$@"
+          elif [ "${{ inputs.package-manager }}" = "pnpm" ]; then
+            pnpm dlx prettier "$@"
+          elif [ "${{ inputs.package-manager }}" = "npm" ]; then
+            npx --yes prettier "$@"
           else
-            echo "::error::Prettier not found locally or globally." >&2
-            exit 1
+            bunx prettier "$@"
           fi
         }
 
